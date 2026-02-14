@@ -1,4 +1,4 @@
-import { joinRoom, selfId } from 'trystero/nostr'
+import { joinRoom } from 'trystero/nostr'
 import type { Room, ActionSender, JsonValue } from 'trystero'
 import QRCodeStyling from 'qr-code-styling'
 import { Html5Qrcode } from 'html5-qrcode'
@@ -17,9 +17,8 @@ let sendFile: ActionSender<ArrayBuffer> | null = null
 // DOM references
 const roomQrEl = document.getElementById('room-qr') as HTMLDivElement
 const roomIdEl = document.getElementById('room-id') as HTMLElement
-const roomStatus = document.getElementById('room-status') as HTMLParagraphElement
-const peersSection = document.getElementById('peers-section') as HTMLElement
-const peersList = document.getElementById('peers-list') as HTMLUListElement
+const peerDot = document.getElementById('peer-dot') as HTMLElement
+const peerCount = document.getElementById('peer-count') as HTMLElement
 const sendSection = document.getElementById('send-section') as HTMLElement
 const fileInput = document.getElementById('file-input') as HTMLInputElement
 const sendBtn = document.getElementById('send-btn') as HTMLButtonElement
@@ -33,23 +32,21 @@ const sendProgressText = document.getElementById(
 const scanBtn = document.getElementById('scan-btn') as HTMLButtonElement
 const scannerEl = document.getElementById('scanner') as HTMLDivElement
 const scanStatus = document.getElementById('scan-status') as HTMLParagraphElement
+const roomIdInput = document.getElementById('room-id-input') as HTMLInputElement
+const joinBtn = document.getElementById('join-btn') as HTMLButtonElement
 
 let qrCode: QRCodeStyling | null = null
 let scanner: Html5Qrcode | null = null
 
 function generateRoomId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  const bytes = crypto.getRandomValues(new Uint8Array(8))
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789'
+  const bytes = crypto.getRandomValues(new Uint8Array(4))
   return Array.from(bytes, (b) => chars[b % chars.length]).join('')
 }
 
-function updatePeersList() {
-  peersList.innerHTML = ''
-  for (const peerId of peers) {
-    const li = document.createElement('li')
-    li.textContent = peerId.slice(0, 12) + '...'
-    peersList.appendChild(li)
-  }
+function updatePeerDot() {
+  peerDot.hidden = peers.size === 0
+  peerCount.textContent = peers.size === 1 ? '1 peer' : `${peers.size} peers`
 }
 
 function printReceivedFile(data: ArrayBuffer, metadata: FileMetadata) {
@@ -114,22 +111,22 @@ async function sendFileHandler() {
 }
 
 function connectToRoom(roomId: string) {
+  roomId = roomId.toLowerCase()
+
   // Leave existing room
   if (room) {
     room.leave()
     room = null
     sendFile = null
     peers.clear()
-    peersList.innerHTML = ''
+    updatePeerDot()
   }
 
-  // Update URL and display
-  location.hash = roomId
+  // Update display
   roomIdEl.textContent = roomId
-  roomStatus.textContent = `You: ${selfId.slice(0, 8)}...`
 
-  // Update QR code
-  const roomUrl = `${location.origin}${location.pathname}#${roomId}`
+  // Update QR code — encode just the room ID
+  const roomUrl = roomId
   if (qrCode) {
     qrCode.update({ data: roomUrl })
   } else {
@@ -148,12 +145,12 @@ function connectToRoom(roomId: string) {
 
   room.onPeerJoin((peerId) => {
     peers.add(peerId)
-    updatePeersList()
+    updatePeerDot()
   })
 
   room.onPeerLeave((peerId) => {
     peers.delete(peerId)
-    updatePeersList()
+    updatePeerDot()
   })
 
   const [sendFileFn, getFile] = room.makeAction<ArrayBuffer>('file')
@@ -163,21 +160,20 @@ function connectToRoom(roomId: string) {
     printReceivedFile(data, metadata as unknown as FileMetadata)
   })
 
-  peersSection.hidden = false
   sendSection.hidden = false
 }
 
 function extractRoomId(scannedText: string): string | null {
-  // Try to parse as URL and extract hash
+  const text = scannedText.trim()
+  // Try to parse as URL and extract hash (backwards compat with old QR codes)
   try {
-    const url = new URL(scannedText)
+    const url = new URL(text)
     const hash = url.hash.slice(1)
     if (hash) return hash
   } catch {
-    // Not a URL — treat as raw room ID if it matches the format
+    // Not a URL — treat as raw room ID
   }
-  // Accept raw 8-char alphanumeric room IDs
-  if (/^[a-z0-9]{8}$/.test(scannedText)) return scannedText
+  if (/^[abcdefghjkmnpqrstuvwxyz23456789]{4}$/i.test(text)) return text
   return null
 }
 
@@ -228,8 +224,7 @@ async function startScanner() {
 }
 
 // Initial room connection
-const initialRoomId = location.hash.slice(1) || generateRoomId()
-connectToRoom(initialRoomId)
+connectToRoom(generateRoomId())
 
 // Event listeners
 fileInput.addEventListener('change', () => {
@@ -237,6 +232,21 @@ fileInput.addEventListener('change', () => {
 })
 sendBtn.addEventListener('click', sendFileHandler)
 scanBtn.addEventListener('click', startScanner)
+
+// Join by room ID input
+function joinByInput() {
+  const id = roomIdInput.value.trim().toLowerCase()
+  if (/^[abcdefghjkmnpqrstuvwxyz23456789]{4}$/i.test(id)) {
+    connectToRoom(id)
+    scanStatus.textContent = `Joined room: ${id}`
+  } else {
+    scanStatus.textContent = 'Enter a valid 4-character room code'
+  }
+}
+joinBtn.addEventListener('click', joinByInput)
+roomIdInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') joinByInput()
+})
 
 // Tab switching (mobile only)
 function switchTab(name: string) {
@@ -257,3 +267,15 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((tab) => {
 if (window.matchMedia('(max-width: 640px)').matches) {
   switchTab('print')
 }
+
+// Info overlay
+const infoOverlay = document.getElementById('info-overlay') as HTMLDivElement
+document.getElementById('info-btn')!.addEventListener('click', () => {
+  infoOverlay.hidden = false
+})
+document.getElementById('info-close')!.addEventListener('click', () => {
+  infoOverlay.hidden = true
+})
+infoOverlay.addEventListener('click', (e) => {
+  if (e.target === infoOverlay) infoOverlay.hidden = true
+})

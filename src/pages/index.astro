@@ -41,43 +41,61 @@
           <h1>printer.party</h1>
           <p class="subtitle">remote printing made painless</p>
         </div>
+        <button id="info-btn" class="info-btn" aria-label="How it works">?</button>
       </header>
+
+      <div id="info-overlay" class="info-overlay" hidden>
+        <div class="info-card">
+          <button id="info-close" class="info-close" aria-label="Close">&times;</button>
+          <h2>How it works</h2>
+          <ol>
+            <li><strong>Open printer.party</strong> on the computer connected to your printer &mdash; it creates a room with a code and QR code.</li>
+            <li><strong>On your phone</strong>, open printer.party and enter the room code or scan the QR code to connect.</li>
+            <li><strong>Pick a file</strong> (PDF or image) on your phone and tap Print &mdash; it gets sent directly to the other device and opens the print dialog.</li>
+          </ol>
+          <p>Files are transferred peer-to-peer. Nothing is uploaded to a server.</p>
+        </div>
+      </div>
 
       <nav id="tabs">
         <button class="tab active" data-tab="room">Room</button>
         <button class="tab" data-tab="print">Print</button>
       </nav>
 
-      <div id="tab-room" class="tab-panel active">
-        <section id="room-section">
-          <div id="room-qr"></div>
-          <p>Room: <code id="room-id">connecting...</code></p>
-          <p id="room-status"></p>
-        </section>
+      <div class="panels">
+        <div id="tab-room" class="tab-panel active">
+          <section id="room-section">
+            <div id="room-qr"></div>
+            <p class="room-id-display" id="room-id">connecting...</p>
+            <span id="peer-dot" class="peer-dot" hidden><span id="peer-count" class="peer-count"></span></span>
+          </section>
+        </div>
 
-        <section id="peers-section" hidden>
-          <h2>Connected Peers</h2>
-          <ul id="peers-list"></ul>
-        </section>
-      </div>
+        <div id="tab-print" class="tab-panel">
+          <section id="scan-section">
+            <h2>Join Room</h2>
+            <div class="join-methods">
+              <div class="join-room-id">
+                <input type="text" id="room-id-input" placeholder="room code" maxlength="4" autocapitalize="none" autocomplete="off" />
+                <button id="join-btn">Join</button>
+              </div>
+              <span class="join-or">or</span>
+              <button id="scan-btn">Scan QR Code</button>
+            </div>
+            <div id="scanner" hidden></div>
+            <p id="scan-status"></p>
+          </section>
 
-      <div id="tab-print" class="tab-panel">
-        <section id="scan-section">
-          <h2>Join Room</h2>
-          <button id="scan-btn">Scan QR Code</button>
-          <div id="scanner" hidden></div>
-          <p id="scan-status"></p>
-        </section>
-
-        <section id="send-section" hidden>
-          <h2>Print File</h2>
-          <input type="file" id="file-input" accept=".pdf,image/*" />
-          <button id="send-btn" disabled>Print</button>
-          <div id="send-progress" hidden>
-            <progress id="send-progress-bar" value="0" max="1"></progress>
-            <span id="send-progress-text"></span>
-          </div>
-        </section>
+          <section id="send-section" hidden>
+            <h2>Print File</h2>
+            <input type="file" id="file-input" accept=".pdf,image/*" />
+            <button id="send-btn" disabled>Print</button>
+            <div id="send-progress" hidden>
+              <progress id="send-progress-bar" value="0" max="1"></progress>
+              <span id="send-progress-text"></span>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
 
@@ -120,7 +138,7 @@
         --disabled-text: #9890a8;
 
         font-family: system-ui, -apple-system, sans-serif;
-        max-width: 800px;
+        max-width: 960px;
         margin: 0 auto;
         padding: 2rem;
         color: var(--text-primary);
@@ -138,6 +156,84 @@
         align-items: center;
         gap: 1rem;
         margin-bottom: 0.5rem;
+      }
+
+      /* Info button */
+      .info-btn {
+        margin-left: auto;
+        margin-right: 0;
+        width: 2.2rem;
+        height: 2.2rem;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      /* Info overlay */
+      .info-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: rgba(53, 36, 80, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .info-overlay[hidden] {
+        display: none;
+      }
+
+      .info-card {
+        background: var(--gradient-card);
+        border: 1px solid var(--border-card);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 480px;
+        width: 100%;
+        position: relative;
+        box-shadow:
+          4px 4px 0 0 var(--shadow-iso),
+          8px 8px 0 0 var(--shadow-iso-blue),
+          12px 12px 20px 0 rgba(130, 90, 200, 0.12);
+      }
+
+      .info-card h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+      }
+
+      .info-card ol {
+        padding-left: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .info-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .info-close {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .app-icon {
@@ -316,23 +412,77 @@
         margin-right: auto;
       }
 
-      /* Peer list */
-      #peers-list {
-        list-style: none;
+      /* Room ID display */
+      .room-id-display {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: 0.3em;
+        text-transform: lowercase;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #9058d8, #d8688e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      /* Peer connected indicator */
+      .peer-dot {
         display: flex;
-        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        margin: 0 auto;
+      }
+
+      .peer-dot::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #4ade80;
+        flex-shrink: 0;
+        box-shadow: 0 0 6px 2px rgba(74, 222, 128, 0.5);
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+
+      .peer-count {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 6px 2px rgba(74, 222, 128, 0.4); }
+        50% { box-shadow: 0 0 12px 4px rgba(74, 222, 128, 0.7); }
+      }
+
+      /* Join methods */
+      .join-methods {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
         flex-wrap: wrap;
       }
 
-      #peers-list li {
-        background: var(--lavender-light);
-        color: var(--purple-accent);
-        padding: 0.3rem 0.85rem;
-        border-radius: 999px;
+      .join-room-id {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      #room-id-input {
+        width: 8rem;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: lowercase;
+      }
+
+      .join-or {
+        color: var(--text-secondary);
         font-size: 0.875rem;
-        font-family: monospace;
-        border: 1px solid var(--border-card);
-        box-shadow: 2px 2px 0 0 var(--shadow-iso-blue);
       }
 
       /* Scanner */
@@ -396,12 +546,24 @@
         z-index: 1;
       }
 
+      /* Desktop two-column layout */
+      .panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+
       /* Tabs - hidden on desktop */
       #tabs {
         display: none;
       }
 
       @media (max-width: 640px) {
+        .panels {
+          grid-template-columns: 1fr;
+        }
+
         #tabs {
           display: flex;
           gap: 0;
