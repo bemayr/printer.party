@@ -25,19 +25,15 @@
       </section>
 
       <section id="send-section" hidden>
-        <h2>Send File</h2>
+        <h2>Print File</h2>
         <input type="file" id="file-input" accept=".pdf,image/*" />
-        <button id="send-btn" disabled>Send to All Peers</button>
+        <button id="send-btn" disabled>Print on All Peers</button>
         <div id="send-progress" hidden>
           <progress id="send-progress-bar" value="0" max="1"></progress>
           <span id="send-progress-text"></span>
         </div>
       </section>
 
-      <section id="receive-section" hidden>
-        <h2>Received Files</h2>
-        <div id="received-files"></div>
-      </section>
     </main>
 
     <script src="../scripts/printer-party.ts"></script>
@@ -98,19 +94,6 @@
       button:disabled {
         background: #9ca3af;
         cursor: not-allowed;
-      }
-
-      .received-file {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-      }
-
-      .received-file img,
-      .received-file embed {
-        margin: 0.5rem 0;
-        border-radius: 4px;
       }
 
       progress {

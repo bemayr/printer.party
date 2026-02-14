@@ -28,8 +28,6 @@ const sendProgressBar = document.getElementById(
 const sendProgressText = document.getElementById(
   'send-progress-text'
 ) as HTMLSpanElement
-const receiveSection = document.getElementById('receive-section') as HTMLElement
-const receivedFiles = document.getElementById('received-files') as HTMLDivElement
 
 function generateRoomId(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -46,69 +44,15 @@ function updatePeersList() {
   }
 }
 
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-}
-
-function printFile(url: string) {
+function printReceivedFile(data: ArrayBuffer, metadata: FileMetadata) {
+  const blob = new Blob([data], { type: metadata.type })
+  const url = URL.createObjectURL(blob)
   const printWindow = window.open(url, '_blank')
   if (printWindow) {
     printWindow.addEventListener('load', () => {
       printWindow.print()
     })
   }
-}
-
-function displayReceivedFile(
-  data: ArrayBuffer,
-  metadata: FileMetadata,
-  peerId: string
-) {
-  const blob = new Blob([data], { type: metadata.type })
-  const url = URL.createObjectURL(blob)
-
-  const container = document.createElement('div')
-  container.className = 'received-file'
-
-  const info = document.createElement('p')
-  info.textContent = `${metadata.name} (${formatBytes(metadata.size)}) from ${peerId.slice(0, 8)}...`
-  container.appendChild(info)
-
-  if (metadata.type.startsWith('image/')) {
-    const img = document.createElement('img')
-    img.src = url
-    img.style.maxWidth = '100%'
-    img.style.maxHeight = '400px'
-    container.appendChild(img)
-  } else if (metadata.type === 'application/pdf') {
-    const embed = document.createElement('embed')
-    embed.src = url
-    embed.type = 'application/pdf'
-    embed.style.width = '100%'
-    embed.style.height = '500px'
-    container.appendChild(embed)
-  }
-
-  const printBtn = document.createElement('button')
-  printBtn.textContent = 'Print'
-  printBtn.addEventListener('click', () => printFile(url))
-  container.appendChild(printBtn)
-
-  const downloadBtn = document.createElement('button')
-  downloadBtn.textContent = 'Download'
-  downloadBtn.addEventListener('click', () => {
-    const a = document.createElement('a')
-    a.href = url
-    a.download = metadata.name
-    a.click()
-  })
-  container.appendChild(downloadBtn)
-
-  receivedFiles.prepend(container)
 }
 
 async function sendFileHandler() {
@@ -173,13 +117,12 @@ room.onPeerLeave((peerId) => {
 const [sendFileFn, getFile] = room.makeAction<ArrayBuffer>('file')
 sendFile = sendFileFn
 
-getFile((data, peerId, metadata) => {
-  displayReceivedFile(data, metadata as unknown as FileMetadata, peerId)
+getFile((data, _peerId, metadata) => {
+  printReceivedFile(data, metadata as unknown as FileMetadata)
 })
 
 peersSection.hidden = false
 sendSection.hidden = false
-receiveSection.hidden = false
 
 // Event listeners
 fileInput.addEventListener('change', () => {
