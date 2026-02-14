@@ -137,7 +137,7 @@ function connectToRoom(roomId: string) {
       width: 200,
       height: 200,
       data: roomUrl,
-      dotsOptions: { type: 'rounded', color: '#1a1a1a' },
+      dotsOptions: { type: 'rounded', color: '#7c5cbf' },
       backgroundOptions: { color: 'transparent' },
     })
     qrCode.append(roomQrEl)

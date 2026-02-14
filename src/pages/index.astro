@@ -1,4 +1,5 @@
 ---
+
 ---
 
 <html lang="en">
@@ -6,12 +7,41 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>printer.party</title>
+    <title>printer.party — remote printing made painless</title>
+    <meta name="description" content="remote printing made painless" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="printer.party" />
+    <meta property="og:description" content="remote printing made painless" />
+    <meta property="og:image" content="https://printer.party/opengraph.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="printer.party" />
+    <meta name="twitter:description" content="remote printing made painless" />
+    <meta name="twitter:image" content="https://printer.party/opengraph.png" />
+
+    <meta name="theme-color" content="#ede4ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="printer.party" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
     <main>
-      <h1>printer.party</h1>
-      <p>Share files and print them, peer-to-peer.</p>
+      <div class="iso-decorations" aria-hidden="true">
+        <div class="iso-cube iso-cube-1"></div>
+        <div class="iso-cube iso-cube-2"></div>
+        <div class="iso-cube iso-cube-3"></div>
+      </div>
+      <header class="app-header">
+        <img src="/icon.png" alt="printer.party" class="app-icon" width="64" height="64" />
+        <div>
+          <h1>printer.party</h1>
+          <p class="subtitle">remote printing made painless</p>
+        </div>
+      </header>
 
       <nav id="tabs">
         <button class="tab active" data-tab="room">Room</button>
@@ -52,6 +82,11 @@
     </main>
 
     <script src="../scripts/printer-party.ts"></script>
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+      }
+    </script>
 
     <style is:global>
       * {
@@ -61,67 +96,227 @@
       }
 
       body {
+        --pink-soft: #f8c8d8;
+        --pink-light: #fde8ef;
+        --lavender: #d4c4f8;
+        --lavender-light: #ede4ff;
+        --blue-soft: #c4d4f8;
+        --blue-light: #dfe8fd;
+        --purple-mid: #9b7ad8;
+        --purple-accent: #7c5cbf;
+        --mint: #c8f0e0;
+        --yellow-soft: #fef3c7;
+        --coral: #f0a0a0;
+        --gradient-bg: linear-gradient(120deg, #f5d5c0 0%, #f4d0de 25%, #e8d4f0 50%, #d8d8f8 75%, #c8d8f8 100%);
+        --gradient-button: linear-gradient(135deg, #a070e0, #7098e8);
+        --gradient-card: linear-gradient(145deg, #ffffff, #f5f0ff);
+        --text-primary: #352450;
+        --text-secondary: #6b5a88;
+        --text-code: #6a45b0;
+        --border-card: rgba(160, 130, 210, 0.45);
+        --shadow-iso: rgba(130, 90, 200, 0.2);
+        --shadow-iso-blue: rgba(120, 160, 230, 0.18);
+        --disabled-bg: #d8d0e4;
+        --disabled-text: #9890a8;
+
         font-family: system-ui, -apple-system, sans-serif;
         max-width: 800px;
         margin: 0 auto;
         padding: 2rem;
-        color: #1a1a1a;
+        color: var(--text-primary);
+        background: var(--gradient-bg);
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+
+      main {
+        position: relative;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .app-icon {
+        border-radius: 14px;
+        box-shadow:
+          2px 2px 0 0 var(--shadow-iso),
+          4px 4px 0 0 var(--shadow-iso-blue);
+        flex-shrink: 0;
       }
 
       h1 {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.15rem;
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #9058d8, #d8688e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
       }
 
       h2 {
         margin-top: 1.5rem;
         margin-bottom: 0.75rem;
+        color: var(--purple-accent);
+        font-weight: 700;
       }
 
+      code {
+        color: var(--text-code);
+        background: var(--lavender-light);
+        padding: 0.15em 0.4em;
+        border-radius: 6px;
+        font-size: 0.9em;
+      }
+
+      /* Isometric section cards */
       section {
         margin-top: 1.5rem;
-        padding: 1rem;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
+        padding: 1.5rem;
+        background: var(--gradient-card);
+        border: 1px solid var(--border-card);
+        border-radius: 16px;
+        position: relative;
+        box-shadow:
+          4px 4px 0 0 var(--shadow-iso),
+          8px 8px 0 0 var(--shadow-iso-blue),
+          12px 12px 20px 0 rgba(130, 90, 200, 0.12);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
 
-      input[type='text'],
-      input[type='file'] {
+      section:hover {
+        transform: translate(-2px, -2px);
+        box-shadow:
+          6px 6px 0 0 var(--shadow-iso),
+          12px 12px 0 0 var(--shadow-iso-blue),
+          16px 16px 28px 0 rgba(130, 90, 200, 0.14);
+      }
+
+      section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, var(--lavender), var(--pink-soft), var(--blue-soft));
+        border-radius: 16px 16px 0 0;
+      }
+
+      /* Inputs */
+      input[type="text"],
+      input[type="file"] {
         padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        border: 1px solid var(--border-card);
+        border-radius: 10px;
         margin-right: 0.5rem;
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--text-primary);
       }
 
+      input[type="file"]::file-selector-button {
+        padding: 0.4rem 0.8rem;
+        border: 1px solid var(--border-card);
+        border-radius: 8px;
+        background: var(--lavender-light);
+        color: var(--text-primary);
+        cursor: pointer;
+        margin-right: 0.5rem;
+        font-family: inherit;
+      }
+
+      /* Buttons with isometric micro-shadows */
       button {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.2rem;
         border: none;
-        border-radius: 4px;
-        background: #4f46e5;
+        border-radius: 10px;
+        background: var(--gradient-button);
         color: white;
         cursor: pointer;
         margin-right: 0.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+        box-shadow:
+          2px 2px 0 0 rgba(155, 122, 216, 0.25),
+          4px 4px 8px 0 rgba(155, 122, 216, 0.1);
       }
 
       button:hover {
-        background: #4338ca;
+        background: linear-gradient(135deg, #b088e8, #80a8f0);
+        box-shadow:
+          2px 2px 0 0 rgba(155, 122, 216, 0.3),
+          4px 4px 12px 0 rgba(155, 122, 216, 0.15),
+          0 0 16px rgba(183, 148, 232, 0.2);
+        transform: translate(-1px, -1px);
       }
 
       button:disabled {
-        background: #9ca3af;
+        background: var(--disabled-bg);
+        color: var(--disabled-text);
         cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
       }
 
+      /* Progress bar */
       progress {
         width: 100%;
-        height: 1.5rem;
+        height: 1rem;
+        border-radius: 10px;
+        border: none;
+        overflow: hidden;
+        background: var(--lavender-light);
       }
 
+      progress::-webkit-progress-bar {
+        background: var(--lavender-light);
+        border-radius: 10px;
+      }
+
+      progress::-webkit-progress-value {
+        background: var(--gradient-button);
+        border-radius: 10px;
+      }
+
+      progress::-moz-progress-bar {
+        background: var(--gradient-button);
+        border-radius: 10px;
+      }
+
+      #send-progress-text {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: inline-block;
+      }
+
+      /* QR code */
       #room-qr {
         display: flex;
         justify-content: center;
         margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow:
+          2px 2px 0 0 var(--shadow-iso),
+          4px 4px 0 0 var(--shadow-iso-blue);
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
       }
 
+      /* Peer list */
       #peers-list {
         list-style: none;
         display: flex;
@@ -130,23 +325,75 @@
       }
 
       #peers-list li {
-        background: #e0e7ff;
-        padding: 0.25rem 0.75rem;
+        background: var(--lavender-light);
+        color: var(--purple-accent);
+        padding: 0.3rem 0.85rem;
         border-radius: 999px;
         font-size: 0.875rem;
         font-family: monospace;
+        border: 1px solid var(--border-card);
+        box-shadow: 2px 2px 0 0 var(--shadow-iso-blue);
       }
 
+      /* Scanner */
       #scanner {
         margin-top: 1rem;
-        border-radius: 8px;
+        border-radius: 16px;
         overflow: hidden;
+        border: 2px solid var(--border-card);
       }
 
       #scan-status {
         margin-top: 0.5rem;
         font-size: 0.875rem;
-        color: #6b7280;
+        color: var(--text-secondary);
+      }
+
+      /* Decorative isometric shapes */
+      .iso-decorations {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 0;
+      }
+
+      .iso-cube {
+        position: absolute;
+        transform: rotate(45deg);
+        border-radius: 6px;
+      }
+
+      .iso-cube-1 {
+        width: 50px;
+        height: 50px;
+        top: 0.5rem;
+        right: -6px;
+        opacity: 0.25;
+        background: linear-gradient(135deg, var(--pink-soft), var(--lavender));
+      }
+
+      .iso-cube-2 {
+        width: 24px;
+        height: 24px;
+        top: 40%;
+        left: -12px;
+        opacity: 0.2;
+        background: linear-gradient(135deg, var(--blue-soft), var(--mint));
+      }
+
+      .iso-cube-3 {
+        width: 36px;
+        height: 36px;
+        bottom: 10%;
+        right: 2%;
+        opacity: 0.18;
+        background: linear-gradient(135deg, var(--lavender), var(--pink-soft));
+      }
+
+      main > *:not(.iso-decorations) {
+        position: relative;
+        z-index: 1;
       }
 
       /* Tabs - hidden on desktop */
@@ -159,29 +406,31 @@
           display: flex;
           gap: 0;
           margin-top: 1.5rem;
-          border-bottom: 2px solid #e0e0e0;
+          border-bottom: 2px solid var(--border-card);
         }
 
         .tab {
           flex: 1;
           background: none;
-          color: #6b7280;
-          border-radius: 8px 8px 0 0;
+          color: var(--text-secondary);
+          border-radius: 10px 10px 0 0;
           padding: 0.75rem 1rem;
           font-size: 1rem;
           margin-right: 0;
           border-bottom: 2px solid transparent;
           margin-bottom: -2px;
+          box-shadow: none;
         }
 
         .tab:hover {
-          background: #f3f4f6;
-          color: #1a1a1a;
+          background: rgba(183, 148, 232, 0.1);
+          color: var(--text-primary);
+          transform: none;
         }
 
         .tab.active {
-          color: #4f46e5;
-          border-bottom-color: #4f46e5;
+          color: var(--purple-accent);
+          border-bottom-color: var(--purple-mid);
           background: none;
         }
 
