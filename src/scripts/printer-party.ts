@@ -47,12 +47,31 @@ function updatePeersList() {
 function printReceivedFile(data: ArrayBuffer, metadata: FileMetadata) {
   const blob = new Blob([data], { type: metadata.type })
   const url = URL.createObjectURL(blob)
-  const printWindow = window.open(url, '_blank')
-  if (printWindow) {
-    printWindow.addEventListener('load', () => {
-      printWindow.print()
-    })
+
+  const iframe = document.createElement('iframe')
+  iframe.style.position = 'fixed'
+  iframe.style.left = '-9999px'
+  document.body.appendChild(iframe)
+
+  if (metadata.type.startsWith('image/')) {
+    const html = `<!DOCTYPE html>
+<html><head><style>
+  @page { margin: 0; }
+  body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+</style></head><body><img src="${url}"></body></html>`
+    iframe.srcdoc = html
+  } else {
+    iframe.src = url
   }
+
+  iframe.addEventListener('load', () => {
+    iframe.contentWindow?.print()
+    iframe.addEventListener('afterprint', () => {
+      iframe.remove()
+      URL.revokeObjectURL(url)
+    })
+  })
 }
 
 async function sendFileHandler() {
