@@ -222,7 +222,7 @@ async function startScanner() {
         scanner = null
         scannerEl.hidden = true
         scanBtn.textContent = 'Scan QR Code'
-        scanStatus.textContent = `Joined room: ${roomId}`
+        scanStatus.textContent = `Connected: ${roomId}`
 
         connectToRoom(roomId)
       },
@@ -261,9 +261,9 @@ function joinByInput() {
   const id = roomIdInput.value.trim().toLowerCase()
   if (/^[abcdefghjkmnpqrstuvwxyz23456789]{4}$/i.test(id)) {
     connectToRoom(id)
-    scanStatus.textContent = `Joined room: ${id}`
+    scanStatus.textContent = `Connected: ${id}`
   } else {
-    scanStatus.textContent = 'Enter a valid 4-character room code'
+    scanStatus.textContent = 'Enter a valid 4-character code'
   }
 }
 joinBtn.addEventListener('click', joinByInput)

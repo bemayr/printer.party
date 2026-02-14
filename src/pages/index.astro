@@ -7,16 +7,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>printer.party — remote printing made painless</title>
-    <meta name="description" content="remote printing made painless" />
+    <title>printer.party — easy remote printing</title>
+    <meta name="description" content="easy remote printing" />
 
+    <meta property="og:url" content="https://printer.party/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="printer.party" />
-    <meta property="og:description" content="remote printing made painless" />
+    <meta property="og:description" content="easy remote printing" />
     <meta property="og:image" content="https://printer.party/opengraph.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="printer.party" />
-    <meta name="twitter:description" content="remote printing made painless" />
+    <meta name="twitter:description" content="easy remote printing" />
     <meta name="twitter:image" content="https://printer.party/opengraph.png" />
 
     <meta name="theme-color" content="#ede4ff" />
@@ -39,7 +42,7 @@
         <img src="/icon.png" alt="printer.party" class="app-icon" width="64" height="64" />
         <div>
           <h1>printer.party</h1>
-          <p class="subtitle">remote printing made painless</p>
+          <p class="subtitle">easy remote printing</p>
         </div>
         <button id="info-btn" class="info-btn" aria-label="How it works">?</button>
       </header>
@@ -48,8 +51,8 @@
         <div class="info-card">
           <h2>How it works</h2>
           <ol>
-            <li><strong>Open printer.party</strong> on the computer connected to your printer &mdash; it creates a room with a code and QR code.</li>
-            <li><strong>On your phone</strong>, open printer.party and enter the room code or scan the QR code to connect.</li>
+            <li><strong>Open printer.party</strong> on the computer connected to your printer &mdash; it creates a code and QR code.</li>
+            <li><strong>On your phone</strong>, open printer.party and enter the code or scan the QR code to connect.</li>
             <li><strong>Pick a file</strong> (PDF or image) on your phone and tap Print &mdash; it gets sent directly to the other device and opens the print dialog.</li>
           </ol>
           <p>Files are transferred peer-to-peer. Nothing is uploaded to a server.</p>
@@ -57,7 +60,7 @@
       </div>
 
       <nav id="tabs">
-        <button class="tab active" data-tab="room">Room</button>
+        <button class="tab active" data-tab="room">Connect</button>
         <button class="tab" data-tab="print">Print</button>
       </nav>
 
@@ -72,12 +75,12 @@
 
         <div id="tab-print" class="tab-panel">
           <section id="scan-section">
-            <h2>Join Room</h2>
+            <h2>Connect</h2>
             <div class="join-methods">
               <button id="scan-btn">Scan QR Code</button>
               <span class="join-or">or</span>
               <div class="join-room-id">
-                <input type="text" id="room-id-input" placeholder="room code" maxlength="4" autocapitalize="none" autocomplete="off" />
+                <input type="text" id="room-id-input" placeholder="code" maxlength="4" autocapitalize="none" autocomplete="off" />
                 <button id="join-btn">Join</button>
               </div>
             </div>
