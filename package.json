@@ -1,0 +1,28 @@
+{
+  "name": "printer.party",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bemayr/printer.party.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/bemayr/printer.party/issues"
+  },
+  "homepage": "https://github.com/bemayr/printer.party#readme",
+  "private": "true",
+  "dependencies": {
+    "astro": "^5.17.2",
+    "qr-code-styling": "^1.9.2",
+    "trystero": "^0.22.0"
+  }
+}

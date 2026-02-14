@@ -1,0 +1,143 @@
+---
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>printer.party</title>
+  </head>
+  <body>
+    <main>
+      <h1>printer.party</h1>
+      <p>Share files and print them, peer-to-peer.</p>
+
+      <section id="room-section">
+        <div id="room-qr"></div>
+        <p>Room: <code id="room-id">connecting...</code></p>
+        <p id="room-status"></p>
+      </section>
+
+      <section id="peers-section" hidden>
+        <h2>Connected Peers</h2>
+        <ul id="peers-list"></ul>
+      </section>
+
+      <section id="send-section" hidden>
+        <h2>Send File</h2>
+        <input type="file" id="file-input" accept=".pdf,image/*" />
+        <button id="send-btn" disabled>Send to All Peers</button>
+        <div id="send-progress" hidden>
+          <progress id="send-progress-bar" value="0" max="1"></progress>
+          <span id="send-progress-text"></span>
+        </div>
+      </section>
+
+      <section id="receive-section" hidden>
+        <h2>Received Files</h2>
+        <div id="received-files"></div>
+      </section>
+    </main>
+
+    <script src="../scripts/printer-party.ts"></script>
+
+    <style is:global>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        color: #1a1a1a;
+      }
+
+      h1 {
+        margin-bottom: 0.5rem;
+      }
+
+      h2 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      section {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      input[type='text'],
+      input[type='file'] {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        background: #4f46e5;
+        color: white;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+
+      button:hover {
+        background: #4338ca;
+      }
+
+      button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      .received-file {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .received-file img,
+      .received-file embed {
+        margin: 0.5rem 0;
+        border-radius: 4px;
+      }
+
+      progress {
+        width: 100%;
+        height: 1.5rem;
+      }
+
+      #room-qr {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+      }
+
+      #peers-list {
+        list-style: none;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      #peers-list li {
+        background: #e0e7ff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-family: monospace;
+      }
+    </style>
+  </body>
+</html>
