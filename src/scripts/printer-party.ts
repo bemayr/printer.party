@@ -79,6 +79,8 @@ function printReceivedFile(data: ArrayBuffer, metadata: FileMetadata) {
   })
 }
 
+let sendAbort: AbortController | null = null
+
 async function sendFileHandler() {
   const file = fileInput.files?.[0]
   if (!file || !sendFile) return
@@ -90,24 +92,36 @@ async function sendFileHandler() {
     size: file.size,
   }
 
-  sendBtn.disabled = true
+  sendBtn.hidden = true
   sendProgress.hidden = false
   sendProgressBar.value = 0
-  sendProgressText.textContent = '0%'
+  sendProgressText.textContent = `Sending ${file.name}...`
+
+  sendAbort = new AbortController()
+  const aborted = sendAbort.signal
 
   await sendFile(
     buffer,
     null,
     metadata as unknown as JsonValue,
     (percent, _peerId) => {
+      if (aborted.aborted) return
       sendProgressBar.value = percent
       sendProgressText.textContent = `${Math.round(percent * 100)}%`
     }
   )
 
-  sendProgressBar.value = 1
-  sendProgressText.textContent = 'Sent!'
-  sendBtn.disabled = false
+  if (!aborted.aborted) {
+    sendProgressBar.value = 1
+    sendProgressText.textContent = 'Sent!'
+    setTimeout(() => {
+      sendProgress.hidden = true
+      sendBtn.hidden = false
+    }, 1500)
+  }
+
+  sendAbort = null
+  fileInput.value = ''
 }
 
 function connectToRoom(roomId: string) {
@@ -227,10 +241,19 @@ async function startScanner() {
 connectToRoom(generateRoomId())
 
 // Event listeners
+const cancelBtn = document.getElementById('cancel-btn') as HTMLButtonElement
+
+sendBtn.addEventListener('click', () => fileInput.click())
 fileInput.addEventListener('change', () => {
-  sendBtn.disabled = !fileInput.files?.length
+  if (fileInput.files?.length) sendFileHandler()
 })
-sendBtn.addEventListener('click', sendFileHandler)
+cancelBtn.addEventListener('click', () => {
+  sendAbort?.abort()
+  sendAbort = null
+  sendProgress.hidden = true
+  sendBtn.hidden = false
+  fileInput.value = ''
+})
 scanBtn.addEventListener('click', startScanner)
 
 // Join by room ID input
@@ -270,12 +293,10 @@ if (window.matchMedia('(max-width: 640px)').matches) {
 
 // Info overlay
 const infoOverlay = document.getElementById('info-overlay') as HTMLDivElement
-document.getElementById('info-btn')!.addEventListener('click', () => {
-  infoOverlay.hidden = false
-})
-document.getElementById('info-close')!.addEventListener('click', () => {
-  infoOverlay.hidden = true
-})
-infoOverlay.addEventListener('click', (e) => {
-  if (e.target === infoOverlay) infoOverlay.hidden = true
+const infoBtn = document.getElementById('info-btn')!
+infoBtn.addEventListener('click', () => {
+  const opening = infoOverlay.hidden
+  infoOverlay.hidden = !opening
+  infoBtn.textContent = opening ? '\u00d7' : '?'
+  infoBtn.setAttribute('aria-label', opening ? 'Close info' : 'How it works')
 })

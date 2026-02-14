@@ -46,7 +46,6 @@
 
       <div id="info-overlay" class="info-overlay" hidden>
         <div class="info-card">
-          <button id="info-close" class="info-close" aria-label="Close">&times;</button>
           <h2>How it works</h2>
           <ol>
             <li><strong>Open printer.party</strong> on the computer connected to your printer &mdash; it creates a room with a code and QR code.</li>
@@ -75,12 +74,12 @@
           <section id="scan-section">
             <h2>Join Room</h2>
             <div class="join-methods">
+              <button id="scan-btn">Scan QR Code</button>
+              <span class="join-or">or</span>
               <div class="join-room-id">
                 <input type="text" id="room-id-input" placeholder="room code" maxlength="4" autocapitalize="none" autocomplete="off" />
                 <button id="join-btn">Join</button>
               </div>
-              <span class="join-or">or</span>
-              <button id="scan-btn">Scan QR Code</button>
             </div>
             <div id="scanner" hidden></div>
             <p id="scan-status"></p>
@@ -88,10 +87,13 @@
 
           <section id="send-section" hidden>
             <h2>Print File</h2>
-            <input type="file" id="file-input" accept=".pdf,image/*" />
-            <button id="send-btn" disabled>Print</button>
+            <input type="file" id="file-input" accept=".pdf,image/*" hidden />
+            <button id="send-btn">Choose & Send</button>
             <div id="send-progress" hidden>
-              <progress id="send-progress-bar" value="0" max="1"></progress>
+              <div class="progress-row">
+                <progress id="send-progress-bar" value="0" max="1"></progress>
+                <button id="cancel-btn" class="cancel-btn">Cancel</button>
+              </div>
               <span id="send-progress-text"></span>
             </div>
           </section>
@@ -176,14 +178,8 @@
 
       /* Info overlay */
       .info-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 100;
-        background: rgba(53, 36, 80, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
+        z-index: 10;
+        margin-top: 0.5rem;
       }
 
       .info-overlay[hidden] {
@@ -194,9 +190,7 @@
         background: var(--gradient-card);
         border: 1px solid var(--border-card);
         border-radius: 16px;
-        padding: 2rem;
-        max-width: 480px;
-        width: 100%;
+        padding: 1.5rem;
         position: relative;
         box-shadow:
           4px 4px 0 0 var(--shadow-iso),
@@ -220,20 +214,6 @@
       .info-card p {
         color: var(--text-secondary);
         font-size: 0.9rem;
-      }
-
-      .info-close {
-        position: absolute;
-        top: 0.75rem;
-        right: 0.75rem;
-        width: 2rem;
-        height: 2rem;
-        padding: 0;
-        border-radius: 50%;
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
 
       .app-icon {
@@ -485,6 +465,23 @@
         font-size: 0.875rem;
       }
 
+      /* Progress row */
+      .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .progress-row progress {
+        flex: 1;
+      }
+
+      .cancel-btn {
+        background: var(--coral);
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+      }
+
       /* Scanner */
       #scanner {
         margin-top: 1rem;
@@ -560,8 +557,21 @@
       }
 
       @media (max-width: 640px) {
+        body {
+          padding: 1.5rem 1.5rem 1.5rem 1rem;
+        }
+
+        section {
+          margin-right: 0.25rem;
+        }
+
         .panels {
           grid-template-columns: 1fr;
+        }
+
+        .join-methods {
+          flex-direction: column;
+          align-items: flex-start;
         }
 
         #tabs {
