@@ -1,6 +1,7 @@
 import { joinRoom, selfId } from 'trystero/nostr'
 import type { Room, ActionSender, JsonValue } from 'trystero'
 import QRCodeStyling from 'qr-code-styling'
+import { Html5Qrcode } from 'html5-qrcode'
 
 interface FileMetadata {
   name: string
@@ -10,6 +11,7 @@ interface FileMetadata {
 
 const config = { appId: 'printer-party' }
 const peers = new Set<string>()
+let room: Room | null = null
 let sendFile: ActionSender<ArrayBuffer> | null = null
 
 // DOM references
@@ -28,6 +30,12 @@ const sendProgressBar = document.getElementById(
 const sendProgressText = document.getElementById(
   'send-progress-text'
 ) as HTMLSpanElement
+const scanBtn = document.getElementById('scan-btn') as HTMLButtonElement
+const scannerEl = document.getElementById('scanner') as HTMLDivElement
+const scanStatus = document.getElementById('scan-status') as HTMLParagraphElement
+
+let qrCode: QRCodeStyling | null = null
+let scanner: Html5Qrcode | null = null
 
 function generateRoomId(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -105,46 +113,147 @@ async function sendFileHandler() {
   sendBtn.disabled = false
 }
 
-// Use room ID from URL hash, or generate a new one
-const roomId = location.hash.slice(1) || generateRoomId()
-location.hash = roomId
-roomIdEl.textContent = roomId
-roomStatus.textContent = `You: ${selfId.slice(0, 8)}...`
+function connectToRoom(roomId: string) {
+  // Leave existing room
+  if (room) {
+    room.leave()
+    room = null
+    sendFile = null
+    peers.clear()
+    peersList.innerHTML = ''
+  }
 
-const roomUrl = `${location.origin}${location.pathname}#${roomId}`
-const qrCode = new QRCodeStyling({
-  width: 200,
-  height: 200,
-  data: roomUrl,
-  dotsOptions: { type: 'rounded', color: '#1a1a1a' },
-  backgroundOptions: { color: 'transparent' },
-})
-qrCode.append(roomQrEl)
+  // Update URL and display
+  location.hash = roomId
+  roomIdEl.textContent = roomId
+  roomStatus.textContent = `You: ${selfId.slice(0, 8)}...`
 
-const room: Room = joinRoom(config, roomId)
+  // Update QR code
+  const roomUrl = `${location.origin}${location.pathname}#${roomId}`
+  if (qrCode) {
+    qrCode.update({ data: roomUrl })
+  } else {
+    qrCode = new QRCodeStyling({
+      width: 200,
+      height: 200,
+      data: roomUrl,
+      dotsOptions: { type: 'rounded', color: '#1a1a1a' },
+      backgroundOptions: { color: 'transparent' },
+    })
+    qrCode.append(roomQrEl)
+  }
 
-room.onPeerJoin((peerId) => {
-  peers.add(peerId)
-  updatePeersList()
-})
+  // Join room
+  room = joinRoom(config, roomId)
 
-room.onPeerLeave((peerId) => {
-  peers.delete(peerId)
-  updatePeersList()
-})
+  room.onPeerJoin((peerId) => {
+    peers.add(peerId)
+    updatePeersList()
+  })
 
-const [sendFileFn, getFile] = room.makeAction<ArrayBuffer>('file')
-sendFile = sendFileFn
+  room.onPeerLeave((peerId) => {
+    peers.delete(peerId)
+    updatePeersList()
+  })
 
-getFile((data, _peerId, metadata) => {
-  printReceivedFile(data, metadata as unknown as FileMetadata)
-})
+  const [sendFileFn, getFile] = room.makeAction<ArrayBuffer>('file')
+  sendFile = sendFileFn
 
-peersSection.hidden = false
-sendSection.hidden = false
+  getFile((data, _peerId, metadata) => {
+    printReceivedFile(data, metadata as unknown as FileMetadata)
+  })
+
+  peersSection.hidden = false
+  sendSection.hidden = false
+}
+
+function extractRoomId(scannedText: string): string | null {
+  // Try to parse as URL and extract hash
+  try {
+    const url = new URL(scannedText)
+    const hash = url.hash.slice(1)
+    if (hash) return hash
+  } catch {
+    // Not a URL — treat as raw room ID if it matches the format
+  }
+  // Accept raw 8-char alphanumeric room IDs
+  if (/^[a-z0-9]{8}$/.test(scannedText)) return scannedText
+  return null
+}
+
+async function startScanner() {
+  if (scanner) {
+    await scanner.stop()
+    scanner = null
+    scannerEl.hidden = true
+    scanBtn.textContent = 'Scan QR Code'
+    scanStatus.textContent = ''
+    return
+  }
+
+  scannerEl.hidden = false
+  scanBtn.textContent = 'Stop Scanner'
+  scanStatus.textContent = 'Starting camera...'
+
+  scanner = new Html5Qrcode('scanner')
+  try {
+    await scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      async (decodedText) => {
+        const roomId = extractRoomId(decodedText)
+        if (!roomId) {
+          scanStatus.textContent = 'Invalid QR code, try again...'
+          return
+        }
+
+        // Stop scanner and join room
+        await scanner!.stop()
+        scanner = null
+        scannerEl.hidden = true
+        scanBtn.textContent = 'Scan QR Code'
+        scanStatus.textContent = `Joined room: ${roomId}`
+
+        connectToRoom(roomId)
+      },
+      () => {} // ignore scan failures (no QR in frame)
+    )
+    scanStatus.textContent = 'Point camera at QR code...'
+  } catch (err) {
+    scanStatus.textContent = `Camera error: ${err}`
+    scannerEl.hidden = true
+    scanBtn.textContent = 'Scan QR Code'
+    scanner = null
+  }
+}
+
+// Initial room connection
+const initialRoomId = location.hash.slice(1) || generateRoomId()
+connectToRoom(initialRoomId)
 
 // Event listeners
 fileInput.addEventListener('change', () => {
   sendBtn.disabled = !fileInput.files?.length
 })
 sendBtn.addEventListener('click', sendFileHandler)
+scanBtn.addEventListener('click', startScanner)
+
+// Tab switching (mobile only)
+function switchTab(name: string) {
+  document
+    .querySelectorAll('.tab, .tab-panel')
+    .forEach((el) => el.classList.remove('active'))
+  document
+    .querySelector(`.tab[data-tab="${name}"]`)
+    ?.classList.add('active')
+  document.getElementById(`tab-${name}`)?.classList.add('active')
+}
+
+document.querySelectorAll<HTMLButtonElement>('.tab').forEach((tab) => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab!))
+})
+
+// On mobile, default to the Print tab
+if (window.matchMedia('(max-width: 640px)').matches) {
+  switchTab('print')
+}

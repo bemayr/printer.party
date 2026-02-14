@@ -13,27 +13,42 @@
       <h1>printer.party</h1>
       <p>Share files and print them, peer-to-peer.</p>
 
-      <section id="room-section">
-        <div id="room-qr"></div>
-        <p>Room: <code id="room-id">connecting...</code></p>
-        <p id="room-status"></p>
-      </section>
+      <nav id="tabs">
+        <button class="tab active" data-tab="room">Room</button>
+        <button class="tab" data-tab="print">Print</button>
+      </nav>
 
-      <section id="peers-section" hidden>
-        <h2>Connected Peers</h2>
-        <ul id="peers-list"></ul>
-      </section>
+      <div id="tab-room" class="tab-panel active">
+        <section id="room-section">
+          <div id="room-qr"></div>
+          <p>Room: <code id="room-id">connecting...</code></p>
+          <p id="room-status"></p>
+        </section>
 
-      <section id="send-section" hidden>
-        <h2>Print File</h2>
-        <input type="file" id="file-input" accept=".pdf,image/*" />
-        <button id="send-btn" disabled>Print</button>
-        <div id="send-progress" hidden>
-          <progress id="send-progress-bar" value="0" max="1"></progress>
-          <span id="send-progress-text"></span>
-        </div>
-      </section>
+        <section id="peers-section" hidden>
+          <h2>Connected Peers</h2>
+          <ul id="peers-list"></ul>
+        </section>
+      </div>
 
+      <div id="tab-print" class="tab-panel">
+        <section id="scan-section">
+          <h2>Join Room</h2>
+          <button id="scan-btn">Scan QR Code</button>
+          <div id="scanner" hidden></div>
+          <p id="scan-status"></p>
+        </section>
+
+        <section id="send-section" hidden>
+          <h2>Print File</h2>
+          <input type="file" id="file-input" accept=".pdf,image/*" />
+          <button id="send-btn" disabled>Print</button>
+          <div id="send-progress" hidden>
+            <progress id="send-progress-bar" value="0" max="1"></progress>
+            <span id="send-progress-text"></span>
+          </div>
+        </section>
+      </div>
     </main>
 
     <script src="../scripts/printer-party.ts"></script>
@@ -120,6 +135,63 @@
         border-radius: 999px;
         font-size: 0.875rem;
         font-family: monospace;
+      }
+
+      #scanner {
+        margin-top: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      #scan-status {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+
+      /* Tabs - hidden on desktop */
+      #tabs {
+        display: none;
+      }
+
+      @media (max-width: 640px) {
+        #tabs {
+          display: flex;
+          gap: 0;
+          margin-top: 1.5rem;
+          border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+          flex: 1;
+          background: none;
+          color: #6b7280;
+          border-radius: 8px 8px 0 0;
+          padding: 0.75rem 1rem;
+          font-size: 1rem;
+          margin-right: 0;
+          border-bottom: 2px solid transparent;
+          margin-bottom: -2px;
+        }
+
+        .tab:hover {
+          background: #f3f4f6;
+          color: #1a1a1a;
+        }
+
+        .tab.active {
+          color: #4f46e5;
+          border-bottom-color: #4f46e5;
+          background: none;
+        }
+
+        .tab-panel {
+          display: none;
+        }
+
+        .tab-panel.active {
+          display: block;
+        }
       }
     </style>
   </body>
