@@ -34,23 +34,43 @@
   <body>
     <main>
       <header class="app-header">
-        <img src="/icon.png" alt="printer.party" class="app-icon" width="64" height="64" />
+        <img
+          src="/icon.png"
+          alt="printer.party"
+          class="app-icon"
+          width="64"
+          height="64"
+        />
         <div>
           <h1>printer.party</h1>
-          <p class="subtitle">easy remote printing</p>
+          <p class="subtitle">printing without the drama</p>
         </div>
-        <button id="info-btn" class="info-btn" aria-label="How it works">?</button>
+        <button id="info-btn" class="info-btn" aria-label="How it works"
+          >?</button
+        >
       </header>
 
       <div id="info-overlay" class="info-overlay" hidden>
         <div class="info-card">
           <h2>How it works</h2>
           <ol>
-            <li><strong>Open printer.party</strong> on the computer connected to your printer &mdash; it creates a code and QR code.</li>
-            <li><strong>On your phone</strong>, open printer.party and enter the code or scan the QR code to connect.</li>
-            <li><strong>Pick a file</strong> (PDF or image) on your phone and tap Print &mdash; it gets sent directly to the other device and opens the print dialog.</li>
+            <li>
+              <strong>Open printer.party</strong> on the computer connected to your
+              printer &mdash; it creates a code and QR code.
+            </li>
+            <li>
+              <strong>On your phone</strong>, open printer.party and enter the
+              code or scan the QR code to connect.
+            </li>
+            <li>
+              <strong>Pick a file</strong> (PDF or image) on your phone and tap Print
+              &mdash; it gets sent directly to the other device and opens the print
+              dialog.
+            </li>
           </ol>
-          <p>Files are transferred peer-to-peer. Nothing is uploaded to a server.</p>
+          <p>
+            Files are transferred peer-to-peer. Nothing is uploaded to a server.
+          </p>
         </div>
       </div>
 
@@ -63,10 +83,16 @@
         <div id="tab-room" class="tab-panel active">
           <section id="room-section">
             <h2 class="panel-title">Share Printer</h2>
-            <p class="room-hint">Scan the QR code or enter the code on another device to connect.</p>
+            <p class="room-hint">
+              Scan the QR code or enter the code on another device to connect.
+            </p>
             <div id="room-qr"></div>
             <p class="room-id-display" id="room-id">connecting...</p>
-            <span id="peer-status" class="peer-status waiting"><span id="peer-count" class="peer-count">Waiting for connection...</span></span>
+            <span id="peer-status" class="peer-status waiting"
+              ><span id="peer-count" class="peer-count"
+                >Waiting for connection...</span
+              ></span
+            >
           </section>
         </div>
 
@@ -77,20 +103,33 @@
             <div id="connect-form" class="join-methods">
               <div id="join-scan" class="join-scan">
                 <button id="scan-btn">Scan QR Code</button>
-                <button id="show-code-btn" class="muted-btn">Enter code instead</button>
+                <button id="show-code-btn" class="muted-btn"
+                  >Enter code instead</button
+                >
               </div>
               <div id="join-code" class="join-code" hidden>
                 <div class="join-room-id">
-                  <input type="text" id="room-id-input" placeholder="code" maxlength="4" autocapitalize="none" autocomplete="off" />
+                  <input
+                    type="text"
+                    id="room-id-input"
+                    placeholder="code"
+                    maxlength="4"
+                    autocapitalize="none"
+                    autocomplete="off"
+                  />
                   <button id="join-btn">Join</button>
                 </div>
-                <button id="show-scan-btn" class="muted-btn">Scan QR instead</button>
+                <button id="show-scan-btn" class="muted-btn"
+                  >Scan QR instead</button
+                >
               </div>
             </div>
             <div id="connect-status" class="connect-status" hidden>
               <span id="connect-status-dot" class="connect-status-dot"></span>
               <span id="connect-status-text">Connected</span>
-              <button id="disconnect-btn" class="muted-btn">Connect to different printer</button>
+              <button id="disconnect-btn" class="muted-btn"
+                >Connect to different printer</button
+              >
             </div>
             <div id="scanner" hidden></div>
             <p id="scan-status"></p>
@@ -112,10 +151,15 @@
       </div>
     </main>
 
+    <footer>
+      Created in the 🏔️ by <a href="https://github.com/bemayr">Bernhard Mayr</a> &middot;
+      <a href="https://github.com/bemayr/printer.party">Source Code</a>
+    </footer>
+
     <script src="../scripts/printer-party.ts"></script>
     <script is:inline>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js");
       }
     </script>
 
@@ -141,13 +185,22 @@
         --cancel: #dc2626;
         --cancel-hover: #b91c1c;
 
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
         max-width: 960px;
         margin: 0 auto;
         padding: 2rem;
         color: var(--text-primary);
         background: var(--bg);
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      main {
+        flex: 1;
       }
 
       .app-header {
@@ -241,6 +294,23 @@
         margin-bottom: 0.75rem;
         color: var(--text-primary);
         font-weight: 600;
+      }
+
+      footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      footer a {
+        color: var(--text-secondary);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      footer a:hover {
+        color: var(--text-primary);
       }
 
       section {
@@ -360,7 +430,10 @@
         font-weight: 700;
         letter-spacing: 0.3em;
         text-transform: lowercase;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
         color: var(--text-primary);
         margin-bottom: 0.5rem;
       }
@@ -382,7 +455,7 @@
       }
 
       .peer-status::before {
-        content: '';
+        content: "";
         width: 8px;
         height: 8px;
         border-radius: 50%;
@@ -424,7 +497,7 @@
       }
 
       .connect-status-dot::before {
-        content: '';
+        content: "";
         width: 8px;
         height: 8px;
         border-radius: 50%;
