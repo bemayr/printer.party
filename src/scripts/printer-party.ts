@@ -142,11 +142,12 @@ function connectToRoom(roomId: string) {
     updatePeerStatus()
   }
 
-  // Update display
+  // Update display and URL hash
   roomIdEl.textContent = roomId
+  location.hash = roomId
 
-  // Update QR code — encode just the room ID
-  const roomUrl = roomId
+  // Update QR code — encode full URL so scanning opens the app directly
+  const roomUrl = `${window.location.origin}${window.location.pathname}#${roomId}`
   if (qrCode) {
     qrCode.update({ data: roomUrl })
   } else {
@@ -243,8 +244,16 @@ async function startScanner() {
   }
 }
 
-// Initial room connection
-connectToRoom(generateRoomId())
+// Initial room connection — join from URL hash or generate new room
+const hashRoomId = location.hash.slice(1)
+if (hashRoomId && /^[abcdefghjkmnpqrstuvwxyz23456789]{4}$/i.test(hashRoomId)) {
+  connectToRoom(hashRoomId)
+  if (window.matchMedia('(max-width: 640px)').matches) {
+    scanStatus.textContent = `Connected: ${hashRoomId}`
+  }
+} else {
+  connectToRoom(generateRoomId())
+}
 
 // Event listeners
 const cancelBtn = document.getElementById('cancel-btn') as HTMLButtonElement
