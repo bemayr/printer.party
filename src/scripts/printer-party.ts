@@ -34,6 +34,10 @@ const scannerEl = document.getElementById('scanner') as HTMLDivElement
 const scanStatus = document.getElementById('scan-status') as HTMLParagraphElement
 const roomIdInput = document.getElementById('room-id-input') as HTMLInputElement
 const joinBtn = document.getElementById('join-btn') as HTMLButtonElement
+const connectForm = document.getElementById('connect-form') as HTMLDivElement
+const connectStatus = document.getElementById('connect-status') as HTMLDivElement
+const connectStatusText = document.getElementById('connect-status-text') as HTMLSpanElement
+const disconnectBtn = document.getElementById('disconnect-btn') as HTMLButtonElement
 
 let qrCode: QRCodeStyling | null = null
 let scanner: Html5Qrcode | null = null
@@ -45,7 +49,8 @@ function generateRoomId(): string {
 }
 
 function updatePeerStatus() {
-  if (peers.size > 0) {
+  const connected = peers.size > 0
+  if (connected) {
     peerStatus.classList.add('connected')
     peerCount.textContent =
       peers.size === 1 ? '1 peer connected' : `${peers.size} peers connected`
@@ -53,6 +58,12 @@ function updatePeerStatus() {
     peerStatus.classList.remove('connected')
     peerCount.textContent = 'Waiting for connection...'
   }
+
+  // Toggle connect form vs connected label on the Print File panel
+  connectForm.hidden = connected
+  connectStatus.hidden = !connected
+  connectStatusText.textContent =
+    peers.size === 1 ? '1 printer connected' : `${peers.size} printers connected`
 }
 
 function printReceivedFile(data: ArrayBuffer, metadata: FileMetadata) {
@@ -142,9 +153,8 @@ function connectToRoom(roomId: string) {
     updatePeerStatus()
   }
 
-  // Update display and URL hash
+  // Update display
   roomIdEl.textContent = roomId
-  location.hash = roomId
 
   // Update QR code — encode full URL so scanning opens the app directly
   const roomUrl = `${window.location.origin}${window.location.pathname}#${roomId}`
@@ -247,6 +257,7 @@ async function startScanner() {
 // Initial room connection — join from URL hash or generate new room
 const hashRoomId = location.hash.slice(1)
 if (hashRoomId && /^[abcdefghjkmnpqrstuvwxyz23456789]{4}$/i.test(hashRoomId)) {
+  history.replaceState(null, '', location.pathname + location.search)
   connectToRoom(hashRoomId)
   if (window.matchMedia('(max-width: 640px)').matches) {
     scanStatus.textContent = `Connected: ${hashRoomId}`
@@ -286,6 +297,20 @@ showCodeBtn.addEventListener('click', () => {
 showScanBtn.addEventListener('click', () => {
   joinCode.hidden = true
   joinScan.hidden = false
+})
+
+disconnectBtn.addEventListener('click', () => {
+  if (room) {
+    room.leave()
+    room = null
+    sendFile = null
+    peers.clear()
+  }
+  sendSection.hidden = true
+  connectForm.hidden = false
+  connectStatus.hidden = true
+  scanStatus.textContent = ''
+  updatePeerStatus()
 })
 
 // Join by room ID input

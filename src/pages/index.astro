@@ -74,7 +74,7 @@
           <section id="scan-section">
             <h2 class="panel-title">Print File</h2>
             <h2 class="step-label">1. Connect</h2>
-            <div class="join-methods">
+            <div id="connect-form" class="join-methods">
               <div id="join-scan" class="join-scan">
                 <button id="scan-btn">Scan QR Code</button>
                 <button id="show-code-btn" class="muted-btn">Enter code instead</button>
@@ -86,6 +86,11 @@
                 </div>
                 <button id="show-scan-btn" class="muted-btn">Scan QR instead</button>
               </div>
+            </div>
+            <div id="connect-status" class="connect-status" hidden>
+              <span id="connect-status-dot" class="connect-status-dot"></span>
+              <span id="connect-status-text">Connected</span>
+              <button id="disconnect-btn" class="muted-btn">Connect to different printer</button>
             </div>
             <div id="scanner" hidden></div>
             <p id="scan-status"></p>
@@ -396,6 +401,34 @@
 
       .peer-status.connected .peer-count {
         color: var(--text-primary);
+      }
+
+      /* Connect status (replaces form when connected) */
+      .connect-status {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .connect-status[hidden] {
+        display: none;
+      }
+
+      .connect-status-dot {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+      }
+
+      .connect-status-dot::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
       }
 
       /* Join methods */
