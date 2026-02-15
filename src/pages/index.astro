@@ -22,7 +22,7 @@
     <meta name="twitter:description" content="easy remote printing" />
     <meta name="twitter:image" content="https://printer.party/opengraph.png" />
 
-    <meta name="theme-color" content="#ede4ff" />
+    <meta name="theme-color" content="#f9f8f6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="printer.party" />
@@ -33,11 +33,6 @@
   </head>
   <body>
     <main>
-      <div class="iso-decorations" aria-hidden="true">
-        <div class="iso-cube iso-cube-1"></div>
-        <div class="iso-cube iso-cube-2"></div>
-        <div class="iso-cube iso-cube-3"></div>
-      </div>
       <header class="app-header">
         <img src="/icon.png" alt="printer.party" class="app-icon" width="64" height="64" />
         <div>
@@ -60,44 +55,52 @@
       </div>
 
       <nav id="tabs">
-        <button class="tab active" data-tab="room">Connect</button>
-        <button class="tab" data-tab="print">Print</button>
+        <button class="tab active" data-tab="room">Share Printer</button>
+        <button class="tab" data-tab="print">Print File</button>
       </nav>
 
       <div class="panels">
         <div id="tab-room" class="tab-panel active">
           <section id="room-section">
+            <h2 class="panel-title">Share Printer</h2>
+            <p class="room-hint">Scan the QR code or enter the code on another device to connect.</p>
             <div id="room-qr"></div>
             <p class="room-id-display" id="room-id">connecting...</p>
-            <span id="peer-dot" class="peer-dot" hidden><span id="peer-count" class="peer-count"></span></span>
+            <span id="peer-status" class="peer-status waiting"><span id="peer-count" class="peer-count">Waiting for connection...</span></span>
           </section>
         </div>
 
         <div id="tab-print" class="tab-panel">
           <section id="scan-section">
-            <h2>Connect</h2>
+            <h2 class="panel-title">Print File</h2>
+            <h2 class="step-label">1. Connect</h2>
             <div class="join-methods">
-              <button id="scan-btn">Scan QR Code</button>
-              <span class="join-or">or</span>
-              <div class="join-room-id">
-                <input type="text" id="room-id-input" placeholder="code" maxlength="4" autocapitalize="none" autocomplete="off" />
-                <button id="join-btn">Join</button>
+              <div id="join-scan" class="join-scan">
+                <button id="scan-btn">Scan QR Code</button>
+                <button id="show-code-btn" class="muted-btn">Enter code instead</button>
+              </div>
+              <div id="join-code" class="join-code" hidden>
+                <div class="join-room-id">
+                  <input type="text" id="room-id-input" placeholder="code" maxlength="4" autocapitalize="none" autocomplete="off" />
+                  <button id="join-btn">Join</button>
+                </div>
+                <button id="show-scan-btn" class="muted-btn">Scan QR instead</button>
               </div>
             </div>
             <div id="scanner" hidden></div>
             <p id="scan-status"></p>
-          </section>
 
-          <section id="send-section" hidden>
-            <h2>Print File</h2>
-            <input type="file" id="file-input" accept=".pdf,image/*" hidden />
-            <button id="send-btn">Choose & Send</button>
-            <div id="send-progress" hidden>
-              <div class="progress-row">
-                <progress id="send-progress-bar" value="0" max="1"></progress>
-                <button id="cancel-btn" class="cancel-btn">Cancel</button>
+            <div id="send-section" class="send-section" hidden>
+              <h2 class="step-label">2. Print</h2>
+              <input type="file" id="file-input" accept=".pdf,image/*" hidden />
+              <button id="send-btn">Choose File & Print</button>
+              <div id="send-progress" hidden>
+                <div class="progress-row">
+                  <progress id="send-progress-bar" value="0" max="1"></progress>
+                  <button id="cancel-btn" class="cancel-btn">Cancel</button>
+                </div>
+                <span id="send-progress-text"></span>
               </div>
-              <span id="send-progress-text"></span>
             </div>
           </section>
         </div>
@@ -119,41 +122,27 @@
       }
 
       body {
-        --pink-soft: #f8c8d8;
-        --pink-light: #fde8ef;
-        --lavender: #d4c4f8;
-        --lavender-light: #ede4ff;
-        --blue-soft: #c4d4f8;
-        --blue-light: #dfe8fd;
-        --purple-mid: #9b7ad8;
-        --purple-accent: #7c5cbf;
-        --mint: #c8f0e0;
-        --yellow-soft: #fef3c7;
-        --coral: #f0a0a0;
-        --gradient-bg: linear-gradient(120deg, #f5d5c0 0%, #f4d0de 25%, #e8d4f0 50%, #d8d8f8 75%, #c8d8f8 100%);
-        --gradient-button: linear-gradient(135deg, #a070e0, #7098e8);
-        --gradient-card: linear-gradient(145deg, #ffffff, #f5f0ff);
-        --text-primary: #352450;
-        --text-secondary: #6b5a88;
-        --text-code: #6a45b0;
-        --border-card: rgba(160, 130, 210, 0.45);
-        --shadow-iso: rgba(130, 90, 200, 0.2);
-        --shadow-iso-blue: rgba(120, 160, 230, 0.18);
-        --disabled-bg: #d8d0e4;
-        --disabled-text: #9890a8;
+        --bg: #f9f8f6;
+        --card-bg: #ffffff;
+        --card-border: #e7e5e4;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --text-primary: #1c1917;
+        --text-secondary: #78716c;
+        --accent: #292524;
+        --accent-hover: #44403c;
+        --disabled-bg: #e7e5e4;
+        --disabled-text: #a8a29e;
+        --cancel: #dc2626;
+        --cancel-hover: #b91c1c;
 
         font-family: system-ui, -apple-system, sans-serif;
         max-width: 960px;
         margin: 0 auto;
         padding: 2rem;
         color: var(--text-primary);
-        background: var(--gradient-bg);
-        background-attachment: fixed;
+        background: var(--bg);
         min-height: 100vh;
-      }
-
-      main {
-        position: relative;
       }
 
       .app-header {
@@ -163,26 +152,35 @@
         margin-bottom: 0.5rem;
       }
 
-      /* Info button */
       .info-btn {
         margin-left: auto;
         margin-right: 0;
-        width: 2.2rem;
-        height: 2.2rem;
+        width: 2rem;
+        height: 2rem;
         padding: 0;
         border-radius: 50%;
-        font-size: 1.1rem;
-        font-weight: 700;
+        font-size: 0.9rem;
+        font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        background: var(--card-bg);
+        color: var(--text-secondary);
+        border: 1px solid var(--card-border);
+        box-shadow: none;
       }
 
-      /* Info overlay */
+      .info-btn:hover {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        box-shadow: none;
+        transform: none;
+      }
+
       .info-overlay {
         z-index: 10;
-        margin-top: 0.5rem;
+        margin-top: 1rem;
       }
 
       .info-overlay[hidden] {
@@ -190,15 +188,11 @@
       }
 
       .info-card {
-        background: var(--gradient-card);
-        border: 1px solid var(--border-card);
-        border-radius: 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
         padding: 1.5rem;
-        position: relative;
-        box-shadow:
-          4px 4px 0 0 var(--shadow-iso),
-          8px 8px 0 0 var(--shadow-iso-blue),
-          12px 12px 20px 0 rgba(130, 90, 200, 0.12);
+        box-shadow: var(--card-shadow);
       }
 
       .info-card h2 {
@@ -221,20 +215,15 @@
 
       .app-icon {
         border-radius: 14px;
-        box-shadow:
-          2px 2px 0 0 var(--shadow-iso),
-          4px 4px 0 0 var(--shadow-iso-blue);
+        box-shadow: var(--card-shadow);
         flex-shrink: 0;
       }
 
       h1 {
         margin-bottom: 0.15rem;
         font-size: 2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #9058d8, #d8688e);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-weight: 700;
+        color: var(--text-primary);
       }
 
       .subtitle {
@@ -245,131 +234,93 @@
       h2 {
         margin-top: 1.5rem;
         margin-bottom: 0.75rem;
-        color: var(--purple-accent);
-        font-weight: 700;
+        color: var(--text-primary);
+        font-weight: 600;
       }
 
-      code {
-        color: var(--text-code);
-        background: var(--lavender-light);
-        padding: 0.15em 0.4em;
-        border-radius: 6px;
-        font-size: 0.9em;
-      }
-
-      /* Isometric section cards */
       section {
         margin-top: 1.5rem;
         padding: 1.5rem;
-        background: var(--gradient-card);
-        border: 1px solid var(--border-card);
-        border-radius: 16px;
-        position: relative;
-        box-shadow:
-          4px 4px 0 0 var(--shadow-iso),
-          8px 8px 0 0 var(--shadow-iso-blue),
-          12px 12px 20px 0 rgba(130, 90, 200, 0.12);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-
-      section:hover {
-        transform: translate(-2px, -2px);
-        box-shadow:
-          6px 6px 0 0 var(--shadow-iso),
-          12px 12px 0 0 var(--shadow-iso-blue),
-          16px 16px 28px 0 rgba(130, 90, 200, 0.14);
-      }
-
-      section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(135deg, var(--lavender), var(--pink-soft), var(--blue-soft));
-        border-radius: 16px 16px 0 0;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
       }
 
       /* Inputs */
       input[type="text"],
       input[type="file"] {
         padding: 0.5rem;
-        border: 1px solid var(--border-card);
-        border-radius: 10px;
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
         margin-right: 0.5rem;
-        background: rgba(255, 255, 255, 0.7);
+        background: var(--card-bg);
         color: var(--text-primary);
+      }
+
+      input[type="text"]:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: -1px;
       }
 
       input[type="file"]::file-selector-button {
         padding: 0.4rem 0.8rem;
-        border: 1px solid var(--border-card);
-        border-radius: 8px;
-        background: var(--lavender-light);
+        border: 1px solid var(--card-border);
+        border-radius: 6px;
+        background: var(--bg);
         color: var(--text-primary);
         cursor: pointer;
         margin-right: 0.5rem;
         font-family: inherit;
       }
 
-      /* Buttons with isometric micro-shadows */
+      /* Buttons */
       button {
         padding: 0.6rem 1.2rem;
         border: none;
-        border-radius: 10px;
-        background: var(--gradient-button);
+        border-radius: 8px;
+        background: var(--accent);
         color: white;
         cursor: pointer;
         margin-right: 0.5rem;
-        font-weight: 600;
+        font-weight: 500;
         font-size: 0.95rem;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-        box-shadow:
-          2px 2px 0 0 rgba(155, 122, 216, 0.25),
-          4px 4px 8px 0 rgba(155, 122, 216, 0.1);
+        transition: background 0.15s ease;
       }
 
       button:hover {
-        background: linear-gradient(135deg, #b088e8, #80a8f0);
-        box-shadow:
-          2px 2px 0 0 rgba(155, 122, 216, 0.3),
-          4px 4px 12px 0 rgba(155, 122, 216, 0.15),
-          0 0 16px rgba(183, 148, 232, 0.2);
-        transform: translate(-1px, -1px);
+        background: var(--accent-hover);
       }
 
       button:disabled {
         background: var(--disabled-bg);
         color: var(--disabled-text);
         cursor: not-allowed;
-        box-shadow: none;
-        transform: none;
       }
 
       /* Progress bar */
       progress {
         width: 100%;
-        height: 1rem;
-        border-radius: 10px;
+        height: 0.5rem;
+        border-radius: 4px;
         border: none;
         overflow: hidden;
-        background: var(--lavender-light);
+        background: var(--disabled-bg);
       }
 
       progress::-webkit-progress-bar {
-        background: var(--lavender-light);
-        border-radius: 10px;
+        background: var(--disabled-bg);
+        border-radius: 4px;
       }
 
       progress::-webkit-progress-value {
-        background: var(--gradient-button);
-        border-radius: 10px;
+        background: var(--accent);
+        border-radius: 4px;
       }
 
       progress::-moz-progress-bar {
-        background: var(--gradient-button);
-        border-radius: 10px;
+        background: var(--accent);
+        border-radius: 4px;
       }
 
       #send-progress-text {
@@ -386,10 +337,8 @@
         margin-bottom: 1rem;
         padding: 1rem;
         background: white;
-        border-radius: 16px;
-        box-shadow:
-          2px 2px 0 0 var(--shadow-iso),
-          4px 4px 0 0 var(--shadow-iso-blue);
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
         width: fit-content;
         margin-left: auto;
         margin-right: auto;
@@ -398,54 +347,86 @@
       /* Room ID display */
       .room-id-display {
         text-align: center;
-        font-size: 3rem;
-        font-weight: 800;
+        font-size: 2.5rem;
+        font-weight: 700;
         letter-spacing: 0.3em;
         text-transform: lowercase;
         font-family: system-ui, -apple-system, sans-serif;
-        background: linear-gradient(135deg, #9058d8, #d8688e);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--text-primary);
         margin-bottom: 0.5rem;
       }
 
-      /* Peer connected indicator */
-      .peer-dot {
+      .room-hint {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+      }
+
+      /* Peer status indicator */
+      .peer-status {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.4rem;
-        margin: 0 auto;
+        gap: 0.5rem;
+        margin: 1.25rem auto 0;
       }
 
-      .peer-dot::before {
+      .peer-status::before {
         content: '';
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background: #4ade80;
         flex-shrink: 0;
-        box-shadow: 0 0 6px 2px rgba(74, 222, 128, 0.5);
-        animation: pulse-glow 2s ease-in-out infinite;
+        background: var(--disabled-bg);
+      }
+
+      .peer-status.connected::before {
+        background: #22c55e;
       }
 
       .peer-count {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
         color: var(--text-secondary);
       }
 
-      @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 6px 2px rgba(74, 222, 128, 0.4); }
-        50% { box-shadow: 0 0 12px 4px rgba(74, 222, 128, 0.7); }
+      .peer-status.connected .peer-count {
+        color: var(--text-primary);
       }
 
       /* Join methods */
       .join-methods {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .join-scan,
+      .join-code {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .join-scan[hidden],
+      .join-code[hidden] {
+        display: none;
+      }
+
+      .muted-btn {
+        background: none;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 400;
+        padding: 0.25rem 0.5rem;
+        margin: 0;
+      }
+
+      .muted-btn:hover {
+        background: none;
+        color: var(--text-primary);
       }
 
       .join-room-id {
@@ -458,7 +439,7 @@
         width: 8rem;
         text-align: center;
         font-size: 1.1rem;
-        font-weight: 700;
+        font-weight: 600;
         letter-spacing: 0.15em;
         text-transform: lowercase;
       }
@@ -480,70 +461,60 @@
       }
 
       .cancel-btn {
-        background: var(--coral);
+        background: var(--cancel);
         padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
+      }
+
+      .cancel-btn:hover {
+        background: var(--cancel-hover);
+      }
+
+      /* Panel titles (desktop only) */
+      .panel-title {
+        margin: -1.5rem -1.5rem 1.25rem;
+        padding: 1rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--card-border);
+      }
+
+      /* Step labels */
+      .step-label {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+      }
+
+      /* Send section (inside scan card) */
+      .send-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--card-border);
+      }
+
+      .send-section #send-btn {
+        display: block;
+        margin: 0 auto;
       }
 
       /* Scanner */
       #scanner {
         margin-top: 1rem;
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
-        border: 2px solid var(--border-card);
+        border: 1px solid var(--card-border);
       }
 
       #scan-status {
         margin-top: 0.5rem;
         font-size: 0.875rem;
         color: var(--text-secondary);
-      }
-
-      /* Decorative isometric shapes */
-      .iso-decorations {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        overflow: hidden;
-        z-index: 0;
-      }
-
-      .iso-cube {
-        position: absolute;
-        transform: rotate(45deg);
-        border-radius: 6px;
-      }
-
-      .iso-cube-1 {
-        width: 50px;
-        height: 50px;
-        top: 0.5rem;
-        right: -6px;
-        opacity: 0.25;
-        background: linear-gradient(135deg, var(--pink-soft), var(--lavender));
-      }
-
-      .iso-cube-2 {
-        width: 24px;
-        height: 24px;
-        top: 40%;
-        left: -12px;
-        opacity: 0.2;
-        background: linear-gradient(135deg, var(--blue-soft), var(--mint));
-      }
-
-      .iso-cube-3 {
-        width: 36px;
-        height: 36px;
-        bottom: 10%;
-        right: 2%;
-        opacity: 0.18;
-        background: linear-gradient(135deg, var(--lavender), var(--pink-soft));
-      }
-
-      main > *:not(.iso-decorations) {
-        position: relative;
-        z-index: 1;
       }
 
       /* Desktop two-column layout */
@@ -561,52 +532,46 @@
 
       @media (max-width: 640px) {
         body {
-          padding: 1.5rem 1.5rem 1.5rem 1rem;
-        }
-
-        section {
-          margin-right: 0.25rem;
+          padding: 1.5rem;
         }
 
         .panels {
           grid-template-columns: 1fr;
         }
 
-        .join-methods {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
         #tabs {
           display: flex;
           gap: 0;
           margin-top: 1.5rem;
-          border-bottom: 2px solid var(--border-card);
+          border-bottom: 1px solid var(--card-border);
         }
 
         .tab {
           flex: 1;
           background: none;
           color: var(--text-secondary);
-          border-radius: 10px 10px 0 0;
+          border-radius: 0;
           padding: 0.75rem 1rem;
-          font-size: 1rem;
+          font-size: 0.95rem;
           margin-right: 0;
           border-bottom: 2px solid transparent;
-          margin-bottom: -2px;
+          margin-bottom: -1px;
           box-shadow: none;
         }
 
         .tab:hover {
-          background: rgba(183, 148, 232, 0.1);
+          background: none;
           color: var(--text-primary);
-          transform: none;
         }
 
         .tab.active {
-          color: var(--purple-accent);
-          border-bottom-color: var(--purple-mid);
+          color: var(--text-primary);
+          border-bottom-color: var(--text-primary);
           background: none;
+        }
+
+        .panel-title {
+          display: none;
         }
 
         .tab-panel {

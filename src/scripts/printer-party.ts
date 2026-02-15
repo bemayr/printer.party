@@ -17,7 +17,7 @@ let sendFile: ActionSender<ArrayBuffer> | null = null
 // DOM references
 const roomQrEl = document.getElementById('room-qr') as HTMLDivElement
 const roomIdEl = document.getElementById('room-id') as HTMLElement
-const peerDot = document.getElementById('peer-dot') as HTMLElement
+const peerStatus = document.getElementById('peer-status') as HTMLElement
 const peerCount = document.getElementById('peer-count') as HTMLElement
 const sendSection = document.getElementById('send-section') as HTMLElement
 const fileInput = document.getElementById('file-input') as HTMLInputElement
@@ -44,9 +44,15 @@ function generateRoomId(): string {
   return Array.from(bytes, (b) => chars[b % chars.length]).join('')
 }
 
-function updatePeerDot() {
-  peerDot.hidden = peers.size === 0
-  peerCount.textContent = peers.size === 1 ? '1 peer' : `${peers.size} peers`
+function updatePeerStatus() {
+  if (peers.size > 0) {
+    peerStatus.classList.add('connected')
+    peerCount.textContent =
+      peers.size === 1 ? '1 peer connected' : `${peers.size} peers connected`
+  } else {
+    peerStatus.classList.remove('connected')
+    peerCount.textContent = 'Waiting for connection...'
+  }
 }
 
 function printReceivedFile(data: ArrayBuffer, metadata: FileMetadata) {
@@ -133,7 +139,7 @@ function connectToRoom(roomId: string) {
     room = null
     sendFile = null
     peers.clear()
-    updatePeerDot()
+    updatePeerStatus()
   }
 
   // Update display
@@ -148,7 +154,7 @@ function connectToRoom(roomId: string) {
       width: 200,
       height: 200,
       data: roomUrl,
-      dotsOptions: { type: 'rounded', color: '#7c5cbf' },
+      dotsOptions: { type: 'rounded', color: '#292524' },
       backgroundOptions: { color: 'transparent' },
     })
     qrCode.append(roomQrEl)
@@ -159,12 +165,12 @@ function connectToRoom(roomId: string) {
 
   room.onPeerJoin((peerId) => {
     peers.add(peerId)
-    updatePeerDot()
+    updatePeerStatus()
   })
 
   room.onPeerLeave((peerId) => {
     peers.delete(peerId)
-    updatePeerDot()
+    updatePeerStatus()
   })
 
   const [sendFileFn, getFile] = room.makeAction<ArrayBuffer>('file')
@@ -255,6 +261,23 @@ cancelBtn.addEventListener('click', () => {
   fileInput.value = ''
 })
 scanBtn.addEventListener('click', startScanner)
+
+// Toggle between scan and code entry
+const joinScan = document.getElementById('join-scan') as HTMLDivElement
+const joinCode = document.getElementById('join-code') as HTMLDivElement
+const showCodeBtn = document.getElementById('show-code-btn') as HTMLButtonElement
+const showScanBtn = document.getElementById('show-scan-btn') as HTMLButtonElement
+
+showCodeBtn.addEventListener('click', () => {
+  joinScan.hidden = true
+  joinCode.hidden = false
+  roomIdInput.focus()
+})
+
+showScanBtn.addEventListener('click', () => {
+  joinCode.hidden = true
+  joinScan.hidden = false
+})
 
 // Join by room ID input
 function joinByInput() {
