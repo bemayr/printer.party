@@ -35,15 +35,14 @@ export default function PrintFilePanel() {
           </div>
         )}
 
-        {isConnected && (
-          <SendSection
-            isSending={isSending}
-            sendProgress={sendProgress}
-            fileName={fileName}
-            onSendFile={(file) => actor.send({ type: 'SEND_FILE', file })}
-            onCancelSend={() => actor.send({ type: 'SEND_CANCEL' })}
-          />
-        )}
+        <SendSection
+          isConnected={isConnected}
+          isSending={isSending}
+          sendProgress={sendProgress}
+          fileName={fileName}
+          onSendFile={(file) => actor.send({ type: 'SEND_FILE', file })}
+          onCancelSend={() => actor.send({ type: 'SEND_CANCEL' })}
+        />
       </section>
     </div>
   )

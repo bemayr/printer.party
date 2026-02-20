@@ -1,6 +1,7 @@
 import { useRef } from 'preact/hooks'
 
 interface Props {
+  isConnected: boolean
   isSending: boolean
   sendProgress: number
   fileName: string
@@ -8,7 +9,7 @@ interface Props {
   onCancelSend: () => void
 }
 
-export default function SendSection({ isSending, sendProgress, fileName, onSendFile, onCancelSend }: Props) {
+export default function SendSection({ isConnected, isSending, sendProgress, fileName, onSendFile, onCancelSend }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const progressText =
@@ -20,7 +21,7 @@ export default function SendSection({ isSending, sendProgress, fileName, onSendF
     <div class="send-section">
       <h2 class="step-label">2. Print</h2>
       {!isSending ? (
-        <button onClick={() => fileInputRef.current?.click()}>Choose File & Print</button>
+        <button disabled={!isConnected} onClick={() => fileInputRef.current?.click()}>Choose File & Print</button>
       ) : (
         <div id="send-progress">
           <div class="progress-row">
