@@ -1,9 +1,13 @@
 import { createActor, fromCallback } from 'xstate'
+import { createBrowserInspector } from '@statelyai/inspect'
 import { joinRoom } from 'trystero/nostr'
 import type { ActionSender, JsonValue } from 'trystero'
 import { printerPartyMachine } from './machine'
 import type { FileMetadata, AppEvent, RoomActorInput, FileTransferActorInput } from './machine'
 import { generateRoomId, isValidRoomId } from './utils'
+
+// Inspector starts silent; Ctrl+Shift+X opens the window.
+const inspector = createBrowserInspector({ autoStart: false })
 
 // ── Module-level resources (managed by actors, not machine context) ───────────
 
@@ -107,10 +111,17 @@ export const actor = createActor(
       fileTransferActor: fileTransferActorImpl,
     },
   }),
-  { input: { initialRoomId } }
+  {
+    input: { initialRoomId },
+    inspect: inspector.inspect,
+  }
 )
 
 actor.start()
+
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'X') inspector.start()
+})
 
 const mq = window.matchMedia('(max-width: 640px)')
 mq.addEventListener('change', (e) => {
