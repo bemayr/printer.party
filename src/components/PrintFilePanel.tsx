@@ -20,11 +20,7 @@ export default function PrintFilePanel() {
         <h2 class="panel-title">Print File</h2>
         <h2 class="step-label">1. Connect</h2>
 
-        {!isConnected && (
-          <JoinMethods
-            onJoinRoom={(roomId) => actor.send({ type: 'JOIN_ROOM', roomId })}
-          />
-        )}
+        {!isConnected && <JoinMethods />}
 
         {isConnected && (
           <div class="connect-status">

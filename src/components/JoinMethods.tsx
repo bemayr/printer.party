@@ -1,38 +1,37 @@
 import { useState } from 'preact/hooks'
+import { useSelector } from '@xstate/react'
 import { Scanner } from '@yudiel/react-qr-scanner'
+import { actor } from '../scripts/actor'
 import { isValidRoomId, extractRoomId } from '../scripts/utils'
 
-interface Props {
-  onJoinRoom: (roomId: string) => void
-}
-
-export default function JoinMethods({ onJoinRoom }: Props) {
-  const [joinMethod, setJoinMethod] = useState<'idle' | 'scan' | 'code'>('idle')
+export default function JoinMethods() {
+  const isScanning = useSelector(actor, (s) => s.hasTag('scanning'))
+  const isEnteringCode = useSelector(actor, (s) => s.hasTag('entering-code'))
   const [roomIdInput, setRoomIdInput] = useState('')
 
   function joinByInput() {
     const id = roomIdInput.trim().toLowerCase()
     if (isValidRoomId(id)) {
-      onJoinRoom(id)
+      actor.send({ type: 'JOIN_ROOM', roomId: id })
       setRoomIdInput('')
     }
   }
 
   return (
     <div class="join-methods">
-      {joinMethod === 'idle' ? (
+      {!isScanning && !isEnteringCode ? (
         <div class="join-idle" style="display:flex;flex-direction:column;gap:0.5rem">
-          <button onClick={() => setJoinMethod('scan')}>Scan QR Code</button>
-          <button class="muted-btn" onClick={() => setJoinMethod('code')}>Enter code instead</button>
+          <button onClick={() => actor.send({ type: 'START_SCAN' })}>Scan QR Code</button>
+          <button class="muted-btn" onClick={() => actor.send({ type: 'START_CODE_ENTRY' })}>Enter code instead</button>
         </div>
-      ) : joinMethod === 'scan' ? (
+      ) : isScanning ? (
         <div class="join-scan">
           <Scanner
             onScan={(codes) => {
               for (const code of codes) {
                 const roomId = extractRoomId(code.rawValue)
                 if (roomId) {
-                  onJoinRoom(roomId)
+                  actor.send({ type: 'QR_DETECTED', roomId })
                   return
                 }
               }
@@ -41,10 +40,10 @@ export default function JoinMethods({ onJoinRoom }: Props) {
             constraints={{ facingMode: 'environment' }}
             scanDelay={200}
           />
-          <button class="muted-btn" onClick={() => setJoinMethod('code')}>
+          <button class="muted-btn" onClick={() => actor.send({ type: 'START_CODE_ENTRY' })}>
             Enter code instead
           </button>
-          <button class="muted-btn" onClick={() => setJoinMethod('idle')}>
+          <button class="muted-btn" onClick={() => actor.send({ type: 'CANCEL_JOIN' })}>
             Cancel
           </button>
         </div>
@@ -64,10 +63,10 @@ export default function JoinMethods({ onJoinRoom }: Props) {
             />
             <button onClick={joinByInput}>Join</button>
           </div>
-          <button class="muted-btn" onClick={() => setJoinMethod('scan')}>
+          <button class="muted-btn" onClick={() => actor.send({ type: 'START_SCAN' })}>
             Scan QR instead
           </button>
-          <button class="muted-btn" onClick={() => setJoinMethod('idle')}>
+          <button class="muted-btn" onClick={() => actor.send({ type: 'CANCEL_JOIN' })}>
             Cancel
           </button>
         </div>

@@ -1,4 +1,4 @@
-import { setup, assign, fromCallback } from 'xstate'
+import { setup, assign, fromCallback, enqueueActions, raise } from 'xstate'
 
 export interface FileMetadata {
   name: string
@@ -24,7 +24,10 @@ export type AppEvent =
   // From fileTransferActor
   | { type: 'SEND_PROGRESS'; percent: number }
   | { type: 'SEND_DONE' }
-  // User interactions
+  // User interactions — join flow
+  | { type: 'START_SCAN' }
+  | { type: 'START_CODE_ENTRY' }
+  | { type: 'CANCEL_JOIN' }
   | { type: 'JOIN_ROOM'; roomId: string }
   | { type: 'DISCONNECT' }
   | { type: 'SEND_FILE'; file: File }
@@ -65,9 +68,6 @@ export const printerPartyMachine = setup({
       },
     }),
     clearPeers: assign({ peers: () => new Set<string>() }),
-    setPrinterRoomId: assign({
-      printerRoomId: ({ event }) => (event.type === 'JOIN_ROOM' ? event.roomId : ''),
-    }),
     setPrintingRoomId: assign({
       printingRoomId: ({ event }) => {
         if (event.type === 'QR_DETECTED' || event.type === 'JOIN_ROOM') return event.roomId
@@ -85,10 +85,14 @@ export const printerPartyMachine = setup({
     switchTab: assign({
       activeTab: ({ event }) => (event.type === 'SWITCH_TAB' ? event.tab : 'print'),
     }),
+    startCodeEntryOnDesktop: enqueueActions(({ enqueue, check }) => {
+      if (check('isDesktop')) enqueue.raise({ type: 'START_CODE_ENTRY' })
+    }),
   },
   guards: {
     hasPeers: ({ context }) => context.peers.size > 0,
     noPeers: ({ context }) => context.peers.size === 0,
+    isDesktop: () => window.matchMedia('(min-width: 641px)').matches,
   },
 }).createMachine({
   id: 'printerParty',
@@ -109,6 +113,7 @@ export const printerPartyMachine = setup({
   states: {
     // This device owns the room and auto-prints received files.
     printer: {
+      type: 'parallel',
       invoke: {
         id: 'printerRoom',
         src: 'printerRoomActor',
@@ -121,23 +126,54 @@ export const printerPartyMachine = setup({
           actions: 'clearPeers',
         },
         JOIN_ROOM: {
-          target: 'printer',
-          reenter: true,
-          actions: ['setPrinterRoomId', 'clearPeers'],
+          target: 'printing',
+          actions: ['setPrintingRoomId', 'clearPeers'],
         },
         QR_DETECTED: {
           target: 'printing',
           actions: ['setPrintingRoomId', 'clearPeers'],
         },
       },
-      initial: 'waiting',
       states: {
-        waiting: {
-          always: [{ guard: 'hasPeers', target: 'connected' }],
+        // Tracks whether any senders have connected to this printer.
+        status: {
+          initial: 'waiting',
+          states: {
+            waiting: {
+              always: [{ guard: 'hasPeers', target: 'connected' }],
+            },
+            connected: {
+              tags: ['printer-connected'],
+              always: [{ guard: 'noPeers', target: 'waiting' }],
+            },
+          },
         },
-        connected: {
-          tags: ['printer-connected'],
-          always: [{ guard: 'noPeers', target: 'waiting' }],
+        // Tracks which join method UI is active.
+        joinMethod: {
+          initial: 'idle',
+          states: {
+            idle: {
+              entry: 'startCodeEntryOnDesktop',
+              on: {
+                START_SCAN: 'scanning',
+                START_CODE_ENTRY: 'enteringCode',
+              },
+            },
+            scanning: {
+              tags: ['scanning'],
+              on: {
+                CANCEL_JOIN: 'idle',
+                START_CODE_ENTRY: 'enteringCode',
+              },
+            },
+            enteringCode: {
+              tags: ['entering-code'],
+              on: {
+                CANCEL_JOIN: 'idle',
+                START_SCAN: 'scanning',
+              },
+            },
+          },
         },
       },
     },
@@ -170,6 +206,30 @@ export const printerPartyMachine = setup({
         // Waiting for the printer peer to connect.
         connecting: {
           always: [{ guard: 'hasPeers', target: 'connected' }],
+          initial: 'idle',
+          states: {
+            idle: {
+              entry: 'startCodeEntryOnDesktop',
+              on: {
+                START_SCAN: 'scanning',
+                START_CODE_ENTRY: 'enteringCode',
+              },
+            },
+            scanning: {
+              tags: ['scanning'],
+              on: {
+                CANCEL_JOIN: 'idle',
+                START_CODE_ENTRY: 'enteringCode',
+              },
+            },
+            enteringCode: {
+              tags: ['entering-code'],
+              on: {
+                CANCEL_JOIN: 'idle',
+                START_SCAN: 'scanning',
+              },
+            },
+          },
         },
 
         // Printer peer is connected; ready to send files.
