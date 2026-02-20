@@ -2,6 +2,7 @@ import { useState, useRef } from 'preact/hooks'
 import { useSelector } from '@xstate/react'
 import { actor } from '../scripts/actor'
 import { isValidRoomId } from '../scripts/utils'
+import './PrintingPanel.css'
 
 export default function PrintingPanel() {
   const isConnected = useSelector(actor, (s) => s.matches({ active: 'connected' }))

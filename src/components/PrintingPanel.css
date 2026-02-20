@@ -1,0 +1,135 @@
+.step-label {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+/* Connect status */
+.connect-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.connect-status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.connect-status-dot::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* Join methods */
+.join-methods {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.join-scan,
+.join-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.muted-btn {
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
+  padding: 0.25rem 0.5rem;
+  margin: 0;
+}
+
+.muted-btn:hover {
+  background: none;
+  color: var(--text-primary);
+}
+
+.join-room-id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#room-id-input {
+  width: 8rem;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
+}
+
+/* Scanner */
+#scanner {
+  margin-top: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+
+#scan-status {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Send section */
+.send-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.send-section button:not(.cancel-btn) {
+  display: block;
+  margin: 0 auto;
+}
+
+#send-progress {
+  margin-top: 1rem;
+}
+
+#send-progress-text {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-row progress {
+  flex: 1;
+}
+
+.cancel-btn {
+  background: var(--cancel);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.cancel-btn:hover {
+  background: var(--cancel-hover);
+}

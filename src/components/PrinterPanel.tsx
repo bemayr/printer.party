@@ -1,6 +1,7 @@
 import { useSelector } from '@xstate/react'
 import { actor } from '../scripts/actor'
 import QRCodeDisplay from './QRCodeDisplay'
+import './PrinterPanel.css'
 
 export default function PrinterPanel() {
   const roomId = useSelector(actor, (s) => s.context.roomId)
