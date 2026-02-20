@@ -133,3 +133,8 @@ export const actor = createActor(
 )
 
 actor.start()
+
+const mq = window.matchMedia('(max-width: 640px)')
+mq.addEventListener('change', (e) => {
+  if (e.matches) actor.send({ type: 'SWITCH_TAB', tab: 'print' })
+})
