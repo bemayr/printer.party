@@ -1,11 +1,11 @@
 import { useSelector } from '@xstate/react'
 import { actor } from '../scripts/actor'
-import QRCodeDisplay from './QRCodeDisplay'
-import './PrinterPanel.css'
+import QRCode from 'react-qr-code'
+import './SharePrinterPanel.css'
 
-export default function PrinterPanel() {
-  const roomId = useSelector(actor, (s) => s.context.roomId)
-  const isConnected = useSelector(actor, (s) => s.matches({ active: 'connected' }))
+export default function SharePrinterPanel() {
+  const roomId = useSelector(actor, (s) => s.context.printerRoomId)
+  const isConnected = useSelector(actor, (s) => s.hasTag('printer-connected'))
   const peerCount = useSelector(actor, (s) => s.context.peers.size)
   const activeTab = useSelector(actor, (s) => s.context.activeTab)
 
@@ -25,7 +25,7 @@ export default function PrinterPanel() {
       <section id="room-section">
         <h2 class="panel-title">Share Printer</h2>
         <p class="room-hint">Scan the QR code or enter the code on another device to connect.</p>
-        {roomUrl && <QRCodeDisplay data={roomUrl} />}
+        {roomUrl && <QRCode id="room-qr" value={roomUrl} size={200} fgColor="#292524" bgColor="transparent" />}
         <p class="room-id-display">{roomId}</p>
         <span class={`peer-status${isConnected ? ' connected' : ''}`}>
           <span class="peer-count">{peerText}</span>

@@ -1,10 +1,9 @@
 import { createActor, fromCallback } from 'xstate'
 import { joinRoom } from 'trystero/nostr'
 import type { ActionSender, JsonValue } from 'trystero'
-import { Html5Qrcode } from 'html5-qrcode'
 import { printerPartyMachine } from './machine'
 import type { FileMetadata, AppEvent, RoomActorInput, FileTransferActorInput } from './machine'
-import { generateRoomId, extractRoomId, isValidRoomId } from './utils'
+import { generateRoomId, isValidRoomId } from './utils'
 
 // ── Module-level resources (managed by actors, not machine context) ───────────
 
@@ -61,27 +60,6 @@ const roomActorImpl = fromCallback<AppEvent, RoomActorInput>(({ input, sendBack 
   }
 })
 
-const scannerActorImpl = fromCallback<AppEvent>(({ sendBack }) => {
-  const scanner = new Html5Qrcode('scanner')
-
-  scanner
-    .start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      (decodedText) => {
-        const roomId = extractRoomId(decodedText)
-        if (roomId) sendBack({ type: 'QR_DETECTED', roomId })
-      },
-      () => {}
-    )
-    .then(() => sendBack({ type: 'SCANNER_READY' }))
-    .catch((err) => sendBack({ type: 'SCANNER_ERROR', message: String(err) }))
-
-  return () => {
-    scanner.stop().catch(() => {})
-  }
-})
-
 const fileTransferActorImpl = fromCallback<AppEvent, FileTransferActorInput>(
   ({ input, sendBack }) => {
     const abort = new AbortController()
@@ -124,8 +102,8 @@ if (hashRoomId) history.replaceState(null, '', location.pathname + location.sear
 export const actor = createActor(
   printerPartyMachine.provide({
     actors: {
-      roomActor: roomActorImpl,
-      scannerActor: scannerActorImpl,
+      printerRoomActor: roomActorImpl,
+      printingRoomActor: roomActorImpl,
       fileTransferActor: fileTransferActorImpl,
     },
   }),

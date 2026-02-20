@@ -2,8 +2,8 @@
 import AppHeader from '../components/AppHeader.astro'
 import AppFooter from '../components/AppFooter.astro'
 import TabNav from '../components/TabNav'
-import PrinterPanel from '../components/PrinterPanel'
-import PrintingPanel from '../components/PrintingPanel'
+import SharePrinterPanel from '../components/SharePrinterPanel'
+import PrintFilePanel from '../components/PrintFilePanel'
 import '../styles/global.css'
 ---
 
@@ -43,8 +43,8 @@ import '../styles/global.css'
       <TabNav client:only="preact" />
 
       <div class="panels">
-        <PrinterPanel client:only="preact" />
-        <PrintingPanel client:only="preact" />
+        <SharePrinterPanel client:only="preact" />
+        <PrintFilePanel client:only="preact" />
       </div>
     </main>
 
