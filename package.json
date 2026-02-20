@@ -24,6 +24,7 @@
     "astro": "^5.17.2",
     "html5-qrcode": "^2.3.8",
     "qr-code-styling": "^1.9.2",
-    "trystero": "^0.22.0"
+    "trystero": "^0.22.0",
+    "xstate": "^5.28.0"
   }
 }

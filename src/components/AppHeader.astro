@@ -1,0 +1,127 @@
+---
+---
+
+<header class="app-header">
+  <img src="/icon.png" alt="printer.party" class="app-icon" width="64" height="64" />
+  <div>
+    <h1>printer.party</h1>
+    <p class="subtitle">printing without the drama</p>
+  </div>
+  <button id="info-btn" class="info-btn" aria-label="How it works">?</button>
+</header>
+
+<div id="info-overlay" class="info-overlay" hidden>
+  <div class="info-card">
+    <h2>How it works</h2>
+    <ol>
+      <li>
+        <strong>Open printer.party</strong> on the computer connected to your
+        printer &mdash; it creates a code and QR code.
+      </li>
+      <li>
+        <strong>On your phone</strong>, open printer.party and enter the
+        code or scan the QR code to connect.
+      </li>
+      <li>
+        <strong>Pick a file</strong> (PDF or image) on your phone and tap Print
+        &mdash; it gets sent directly to the other device and opens the print
+        dialog.
+      </li>
+    </ol>
+    <p>Files are transferred peer-to-peer. Nothing is uploaded to a server.</p>
+  </div>
+</div>
+
+<script>
+  const infoOverlay = document.getElementById('info-overlay') as HTMLDivElement
+  const infoBtn = document.getElementById('info-btn')!
+  let infoOpen = false
+
+  infoBtn.addEventListener('click', () => {
+    infoOpen = !infoOpen
+    infoOverlay.hidden = !infoOpen
+    infoBtn.textContent = infoOpen ? '\u00d7' : '?'
+    infoBtn.setAttribute('aria-label', infoOpen ? 'Close info' : 'How it works')
+  })
+</script>
+
+<style>
+  .app-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .app-icon {
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    flex-shrink: 0;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .info-btn {
+    margin-left: auto;
+    margin-right: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--card-border);
+    box-shadow: none;
+  }
+
+  .info-btn:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: none;
+    transform: none;
+  }
+
+  .info-overlay {
+    z-index: 10;
+    margin-top: 1rem;
+  }
+
+  .info-overlay[hidden] {
+    display: none;
+  }
+
+  .info-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+  }
+
+  .info-card h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .info-card ol {
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+</style>

@@ -1,0 +1,317 @@
+---
+---
+
+<div id="tab-print" class="tab-panel active">
+  <section id="scan-section">
+    <h2 class="panel-title">Print File</h2>
+    <h2 class="step-label">1. Connect</h2>
+    <div id="connect-form" class="join-methods">
+      <div id="join-scan" class="join-scan">
+        <button id="scan-btn">Scan QR Code</button>
+        <button id="show-code-btn" class="muted-btn">Enter code instead</button>
+      </div>
+      <div id="join-code" class="join-code" hidden>
+        <div class="join-room-id">
+          <input
+            type="text"
+            id="room-id-input"
+            placeholder="code"
+            maxlength="4"
+            autocapitalize="none"
+            autocomplete="off"
+          />
+          <button id="join-btn">Join</button>
+        </div>
+        <button id="show-scan-btn" class="muted-btn">Scan QR instead</button>
+      </div>
+    </div>
+    <div id="connect-status" class="connect-status" hidden>
+      <span id="connect-status-dot" class="connect-status-dot"></span>
+      <span id="connect-status-text">Connected</span>
+      <button id="disconnect-btn" class="muted-btn">Connect to different printer</button>
+    </div>
+    <div id="scanner" hidden></div>
+    <p id="scan-status"></p>
+
+    <div id="send-section" class="send-section" hidden>
+      <h2 class="step-label">2. Print</h2>
+      <input type="file" id="file-input" accept=".pdf,image/*" hidden />
+      <button id="send-btn">Choose File & Print</button>
+      <div id="send-progress" hidden>
+        <div class="progress-row">
+          <progress id="send-progress-bar" value="0" max="1"></progress>
+          <button id="cancel-btn" class="cancel-btn">Cancel</button>
+        </div>
+        <span id="send-progress-text"></span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  import { actor } from '../scripts/actor'
+  import { isValidRoomId } from '../scripts/utils'
+
+  const tabPanel = document.getElementById('tab-print') as HTMLDivElement
+  const connectForm = document.getElementById('connect-form') as HTMLDivElement
+  const connectStatus = document.getElementById('connect-status') as HTMLDivElement
+  const connectStatusText = document.getElementById('connect-status-text') as HTMLSpanElement
+  const disconnectBtn = document.getElementById('disconnect-btn') as HTMLButtonElement
+  const scanBtn = document.getElementById('scan-btn') as HTMLButtonElement
+  const scannerEl = document.getElementById('scanner') as HTMLDivElement
+  const scanStatus = document.getElementById('scan-status') as HTMLParagraphElement
+  const sendSection = document.getElementById('send-section') as HTMLElement
+  const fileInput = document.getElementById('file-input') as HTMLInputElement
+  const sendBtn = document.getElementById('send-btn') as HTMLButtonElement
+  const sendProgress = document.getElementById('send-progress') as HTMLDivElement
+  const sendProgressBar = document.getElementById('send-progress-bar') as HTMLProgressElement
+  const sendProgressText = document.getElementById('send-progress-text') as HTMLSpanElement
+  const cancelBtn = document.getElementById('cancel-btn') as HTMLButtonElement
+  const joinScan = document.getElementById('join-scan') as HTMLDivElement
+  const joinCode = document.getElementById('join-code') as HTMLDivElement
+  const showCodeBtn = document.getElementById('show-code-btn') as HTMLButtonElement
+  const showScanBtn = document.getElementById('show-scan-btn') as HTMLButtonElement
+  const roomIdInput = document.getElementById('room-id-input') as HTMLInputElement
+  const joinBtn = document.getElementById('join-btn') as HTMLButtonElement
+
+  // ── Subscribe ────────────────────────────────────────────────────────────────
+
+  actor.subscribe((snapshot) => {
+    const { context } = snapshot
+    const isConnected = snapshot.matches({ active: 'connected' })
+    const isScanning = snapshot.matches({ active: { waiting: 'scanning' } })
+    const isSending = snapshot.matches({ active: { connected: 'sending' } })
+
+    // Tab visibility
+    tabPanel.classList.toggle('active', context.activeTab === 'print')
+
+    // Connect form vs connected status
+    connectForm.hidden = isConnected
+    connectStatus.hidden = !isConnected
+    connectStatusText.textContent =
+      context.peers.size === 1 ? '1 printer connected' : `${context.peers.size} printers connected`
+
+    // Scanner
+    scannerEl.hidden = !isScanning
+    scanBtn.textContent = isScanning ? 'Stop Scanner' : 'Scan QR Code'
+    if (context.scanError) {
+      scanStatus.textContent = `Camera error: ${context.scanError}`
+    } else if (isScanning) {
+      scanStatus.textContent = 'Point camera at QR code...'
+    }
+
+    // Send section
+    sendSection.hidden = !isConnected
+    sendBtn.hidden = isSending
+    sendProgress.hidden = !isSending
+    if (isSending) {
+      sendProgressBar.value = context.sendProgress
+      sendProgressText.textContent =
+        context.sendProgress === 0
+          ? `Sending ${context.fileToSend?.name ?? ''}...`
+          : `${Math.round(context.sendProgress * 100)}%`
+    }
+  })
+
+  // ── Event wiring ─────────────────────────────────────────────────────────────
+
+  scanBtn.addEventListener('click', () => actor.send({ type: 'SCAN_TOGGLE' }))
+
+  cancelBtn.addEventListener('click', () => actor.send({ type: 'SEND_CANCEL' }))
+
+  disconnectBtn.addEventListener('click', () => actor.send({ type: 'DISCONNECT' }))
+
+  sendBtn.addEventListener('click', () => fileInput.click())
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files?.[0]
+    if (file) actor.send({ type: 'SEND_FILE', file })
+    fileInput.value = ''
+  })
+
+  function joinByInput() {
+    const id = roomIdInput.value.trim().toLowerCase()
+    if (isValidRoomId(id)) {
+      actor.send({ type: 'JOIN_ROOM', roomId: id })
+      scanStatus.textContent = `Connected: ${id}`
+    } else {
+      scanStatus.textContent = 'Enter a valid 4-character code'
+    }
+  }
+  joinBtn.addEventListener('click', joinByInput)
+  roomIdInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') joinByInput()
+  })
+
+  // Toggle between scan and code entry (pure UI)
+  showCodeBtn.addEventListener('click', () => {
+    joinScan.hidden = true
+    joinCode.hidden = false
+    roomIdInput.focus()
+  })
+  showScanBtn.addEventListener('click', () => {
+    joinCode.hidden = true
+    joinScan.hidden = false
+  })
+</script>
+
+<style>
+  .step-label {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+
+  .panel-title {
+    margin: -1.5rem -1.5rem 1.25rem;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  @media (max-width: 640px) {
+    .panel-title {
+      display: none;
+    }
+  }
+
+  /* Connect status */
+  .connect-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .connect-status[hidden] {
+    display: none;
+  }
+
+  .connect-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+  }
+
+  .connect-status-dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+
+  /* Join methods */
+  .join-methods {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .join-scan,
+  .join-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .join-scan[hidden],
+  .join-code[hidden] {
+    display: none;
+  }
+
+  .muted-btn {
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 400;
+    padding: 0.25rem 0.5rem;
+    margin: 0;
+  }
+
+  .muted-btn:hover {
+    background: none;
+    color: var(--text-primary);
+  }
+
+  .join-room-id {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #room-id-input {
+    width: 8rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: lowercase;
+  }
+
+  /* Scanner */
+  #scanner {
+    margin-top: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+
+  #scan-status {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  /* Send section */
+  .send-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-border);
+  }
+
+  .send-section #send-btn {
+    display: block;
+    margin: 0 auto;
+  }
+
+  #send-progress {
+    margin-top: 1rem;
+  }
+
+  #send-progress-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: inline-block;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .progress-row progress {
+    flex: 1;
+  }
+
+  .cancel-btn {
+    background: var(--cancel);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .cancel-btn:hover {
+    background: var(--cancel-hover);
+  }
+</style>

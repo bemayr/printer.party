@@ -1,5 +1,8 @@
 ---
-
+import AppHeader from '../components/AppHeader.astro'
+import PrinterPanel from '../components/PrinterPanel.astro'
+import PrintingPanel from '../components/PrintingPanel.astro'
+import AppFooter from '../components/AppFooter.astro'
 ---
 
 <html lang="en">
@@ -33,133 +36,40 @@
   </head>
   <body>
     <main>
-      <header class="app-header">
-        <img
-          src="/icon.png"
-          alt="printer.party"
-          class="app-icon"
-          width="64"
-          height="64"
-        />
-        <div>
-          <h1>printer.party</h1>
-          <p class="subtitle">printing without the drama</p>
-        </div>
-        <button id="info-btn" class="info-btn" aria-label="How it works"
-          >?</button
-        >
-      </header>
-
-      <div id="info-overlay" class="info-overlay" hidden>
-        <div class="info-card">
-          <h2>How it works</h2>
-          <ol>
-            <li>
-              <strong>Open printer.party</strong> on the computer connected to your
-              printer &mdash; it creates a code and QR code.
-            </li>
-            <li>
-              <strong>On your phone</strong>, open printer.party and enter the
-              code or scan the QR code to connect.
-            </li>
-            <li>
-              <strong>Pick a file</strong> (PDF or image) on your phone and tap Print
-              &mdash; it gets sent directly to the other device and opens the print
-              dialog.
-            </li>
-          </ol>
-          <p>
-            Files are transferred peer-to-peer. Nothing is uploaded to a server.
-          </p>
-        </div>
-      </div>
+      <AppHeader />
 
       <nav id="tabs">
-        <button class="tab active" data-tab="room">Share Printer</button>
-        <button class="tab" data-tab="print">Print File</button>
+        <button class="tab" data-tab="room">Share Printer</button>
+        <button class="tab active" data-tab="print">Print File</button>
       </nav>
 
       <div class="panels">
-        <div id="tab-room" class="tab-panel active">
-          <section id="room-section">
-            <h2 class="panel-title">Share Printer</h2>
-            <p class="room-hint">
-              Scan the QR code or enter the code on another device to connect.
-            </p>
-            <div id="room-qr"></div>
-            <p class="room-id-display" id="room-id">connecting...</p>
-            <span id="peer-status" class="peer-status waiting"
-              ><span id="peer-count" class="peer-count"
-                >Waiting for connection...</span
-              ></span
-            >
-          </section>
-        </div>
-
-        <div id="tab-print" class="tab-panel">
-          <section id="scan-section">
-            <h2 class="panel-title">Print File</h2>
-            <h2 class="step-label">1. Connect</h2>
-            <div id="connect-form" class="join-methods">
-              <div id="join-scan" class="join-scan">
-                <button id="scan-btn">Scan QR Code</button>
-                <button id="show-code-btn" class="muted-btn"
-                  >Enter code instead</button
-                >
-              </div>
-              <div id="join-code" class="join-code" hidden>
-                <div class="join-room-id">
-                  <input
-                    type="text"
-                    id="room-id-input"
-                    placeholder="code"
-                    maxlength="4"
-                    autocapitalize="none"
-                    autocomplete="off"
-                  />
-                  <button id="join-btn">Join</button>
-                </div>
-                <button id="show-scan-btn" class="muted-btn"
-                  >Scan QR instead</button
-                >
-              </div>
-            </div>
-            <div id="connect-status" class="connect-status" hidden>
-              <span id="connect-status-dot" class="connect-status-dot"></span>
-              <span id="connect-status-text">Connected</span>
-              <button id="disconnect-btn" class="muted-btn"
-                >Connect to different printer</button
-              >
-            </div>
-            <div id="scanner" hidden></div>
-            <p id="scan-status"></p>
-
-            <div id="send-section" class="send-section" hidden>
-              <h2 class="step-label">2. Print</h2>
-              <input type="file" id="file-input" accept=".pdf,image/*" hidden />
-              <button id="send-btn">Choose File & Print</button>
-              <div id="send-progress" hidden>
-                <div class="progress-row">
-                  <progress id="send-progress-bar" value="0" max="1"></progress>
-                  <button id="cancel-btn" class="cancel-btn">Cancel</button>
-                </div>
-                <span id="send-progress-text"></span>
-              </div>
-            </div>
-          </section>
-        </div>
+        <PrinterPanel />
+        <PrintingPanel />
       </div>
     </main>
 
-    <footer>
-      Created in the 🏔️ by <a href="https://github.com/bemayr">Bernhard Mayr</a> &middot;
-      <a href="https://github.com/bemayr/printer.party">Source Code</a>
-    </footer>
+    <AppFooter />
 
-    <script src="../scripts/printer-party.ts"></script>
+    <script>
+      import { actor } from '../scripts/actor'
+
+      // Tab nav: wire clicks + subscribe to keep button active state in sync
+      document.querySelectorAll<HTMLButtonElement>('.tab').forEach((tab) => {
+        tab.addEventListener('click', () =>
+          actor.send({ type: 'SWITCH_TAB', tab: tab.dataset.tab as 'room' | 'print' })
+        )
+      })
+      actor.subscribe(({ context }) => {
+        document.querySelectorAll<HTMLButtonElement>('.tab').forEach((tab) => {
+          tab.classList.toggle('active', tab.dataset.tab === context.activeTab)
+        })
+      })
+    </script>
+
     <script is:inline>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js");
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
       }
     </script>
 
@@ -185,10 +95,7 @@
         --cancel: #dc2626;
         --cancel-hover: #b91c1c;
 
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
+        font-family: system-ui, -apple-system, sans-serif;
         max-width: 960px;
         margin: 0 auto;
         padding: 2rem;
@@ -203,90 +110,11 @@
         flex: 1;
       }
 
-      .app-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .info-btn {
-        margin-left: auto;
-        margin-right: 0;
-        width: 2rem;
-        height: 2rem;
-        padding: 0;
-        border-radius: 50%;
-        font-size: 0.9rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        background: var(--card-bg);
-        color: var(--text-secondary);
-        border: 1px solid var(--card-border);
-        box-shadow: none;
-      }
-
-      .info-btn:hover {
-        background: var(--card-bg);
-        color: var(--text-primary);
-        box-shadow: none;
-        transform: none;
-      }
-
-      .info-overlay {
-        z-index: 10;
-        margin-top: 1rem;
-      }
-
-      .info-overlay[hidden] {
-        display: none;
-      }
-
-      .info-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: var(--card-shadow);
-      }
-
-      .info-card h2 {
-        margin-top: 0;
-        margin-bottom: 1rem;
-      }
-
-      .info-card ol {
-        padding-left: 1.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-      }
-
-      .info-card p {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-      }
-
-      .app-icon {
-        border-radius: 14px;
-        box-shadow: var(--card-shadow);
-        flex-shrink: 0;
-      }
-
       h1 {
         margin-bottom: 0.15rem;
         font-size: 2rem;
         font-weight: 700;
         color: var(--text-primary);
-      }
-
-      .subtitle {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
       }
 
       h2 {
@@ -296,35 +124,9 @@
         font-weight: 600;
       }
 
-      footer {
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-      }
-
-      footer a {
-        color: var(--text-secondary);
-        text-decoration: underline;
-        text-underline-offset: 2px;
-      }
-
-      footer a:hover {
-        color: var(--text-primary);
-      }
-
-      section {
-        margin-top: 1.5rem;
-        padding: 1.5rem;
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 12px;
-        box-shadow: var(--card-shadow);
-      }
-
       /* Inputs */
-      input[type="text"],
-      input[type="file"] {
+      input[type='text'],
+      input[type='file'] {
         padding: 0.5rem;
         border: 1px solid var(--card-border);
         border-radius: 8px;
@@ -333,12 +135,12 @@
         color: var(--text-primary);
       }
 
-      input[type="text"]:focus {
+      input[type='text']:focus {
         outline: 2px solid var(--accent);
         outline-offset: -1px;
       }
 
-      input[type="file"]::file-selector-button {
+      input[type='file']::file-selector-button {
         padding: 0.4rem 0.8rem;
         border: 1px solid var(--card-border);
         border-radius: 6px;
@@ -398,233 +200,13 @@
         border-radius: 4px;
       }
 
-      #send-progress {
-        margin-top: 1rem;
-      }
-
-      #send-progress-text {
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-        display: inline-block;
-      }
-
-      /* QR code */
-      #room-qr {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background: white;
-        border-radius: 12px;
+      section {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: var(--card-bg);
         border: 1px solid var(--card-border);
-        width: fit-content;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      /* Room ID display */
-      .room-id-display {
-        text-align: center;
-        font-size: 2.5rem;
-        font-weight: 700;
-        letter-spacing: 0.3em;
-        text-transform: lowercase;
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
-      }
-
-      .room-hint {
-        text-align: center;
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-bottom: 0.75rem;
-      }
-
-      /* Peer status indicator */
-      .peer-status {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        margin: 1.25rem auto 0;
-      }
-
-      .peer-status::before {
-        content: "";
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-        background: var(--disabled-bg);
-      }
-
-      .peer-status.connected::before {
-        background: #22c55e;
-      }
-
-      .peer-count {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-      }
-
-      .peer-status.connected .peer-count {
-        color: var(--text-primary);
-      }
-
-      /* Connect status (replaces form when connected) */
-      .connect-status {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.25rem;
-      }
-
-      .connect-status[hidden] {
-        display: none;
-      }
-
-      .connect-status-dot {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        color: var(--text-primary);
-      }
-
-      .connect-status-dot::before {
-        content: "";
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #22c55e;
-      }
-
-      /* Join methods */
-      .join-methods {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .join-scan,
-      .join-code {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .join-scan[hidden],
-      .join-code[hidden] {
-        display: none;
-      }
-
-      .muted-btn {
-        background: none;
-        color: var(--text-secondary);
-        font-size: 0.8rem;
-        font-weight: 400;
-        padding: 0.25rem 0.5rem;
-        margin: 0;
-      }
-
-      .muted-btn:hover {
-        background: none;
-        color: var(--text-primary);
-      }
-
-      .join-room-id {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      #room-id-input {
-        width: 8rem;
-        text-align: center;
-        font-size: 1.1rem;
-        font-weight: 600;
-        letter-spacing: 0.15em;
-        text-transform: lowercase;
-      }
-
-      .join-or {
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-      }
-
-      /* Progress row */
-      .progress-row {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .progress-row progress {
-        flex: 1;
-      }
-
-      .cancel-btn {
-        background: var(--cancel);
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-      }
-
-      .cancel-btn:hover {
-        background: var(--cancel-hover);
-      }
-
-      /* Panel titles (desktop only) */
-      .panel-title {
-        margin: -1.5rem -1.5rem 1.25rem;
-        padding: 1rem 1.5rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        border-bottom: 1px solid var(--card-border);
-      }
-
-      /* Step labels */
-      .step-label {
-        margin-top: 0;
-        margin-bottom: 0.75rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-secondary);
-      }
-
-      /* Send section (inside scan card) */
-      .send-section {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--card-border);
-      }
-
-      .send-section #send-btn {
-        display: block;
-        margin: 0 auto;
-      }
-
-      /* Scanner */
-      #scanner {
-        margin-top: 1rem;
         border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid var(--card-border);
-      }
-
-      #scan-status {
-        margin-top: 0.5rem;
-        font-size: 0.875rem;
-        color: var(--text-secondary);
+        box-shadow: var(--card-shadow);
       }
 
       /* Desktop two-column layout */
@@ -635,7 +217,7 @@
         align-items: start;
       }
 
-      /* Tabs - hidden on desktop */
+      /* Tabs — hidden on desktop */
       #tabs {
         display: none;
       }
@@ -678,10 +260,6 @@
           color: var(--text-primary);
           border-bottom-color: var(--text-primary);
           background: none;
-        }
-
-        .panel-title {
-          display: none;
         }
 
         .tab-panel {
